@@ -1,0 +1,563 @@
+<!-- 04/03/2026_1031 -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Calles y Arbolado</title>
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/modernizacionmjm/web/refs/heads/main/Logos/favicon.ico">
+
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        #map { 
+            height: 60vh;
+            border-radius: 0.75rem; 
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            z-index: 10; 
+        }
+        
+        .info-input {
+            background-color: #f3f4f6; 
+            border: 1px solid #d1d5db;
+            color: #1f2937;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        #info-panel {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        
+        .legend {
+            line-height: 1.5;
+            color: #333;
+        }
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.9;
+            border-radius: 4px;
+        }
+
+        :root{
+        --mjm-logo-width: 160px; 
+        }
+
+        .mjm-logo{
+        width: var(--mjm-logo-width);
+        height: auto;
+        display: inline-block;
+        }
+
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="container mx-auto p-4 md:p-8 space-y-6">
+        
+        <div class="text-center">
+
+            <img
+            src="https://raw.githubusercontent.com/modernizacionmjm/web/refs/heads/main/Logos/LogoDef.png"
+            alt="Municipalidad de Jesús María"
+            class="mjm-logo mx-auto mb-3">
+
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Calles de Jesús María | Medidas y Arbolado</h1>
+            <p class="text-gray-600 mt-2">Haz clic sobre una calle en el mapa para consultar su información.</p>
+        </div>
+
+        
+        <div class="bg-white p-4 rounded-xl shadow-md space-y-3">
+
+        <p class="text-gray-700 font-medium">
+        Indique su dirección para ver la información de arbolado urbano de esa calle
+        </p>
+
+        <div class="flex flex-col md:flex-row gap-3">
+
+        <div class="relative flex-1">
+        <input type="text"
+            id="buscarCalle"
+            placeholder="Ingrese nombre de la calle"
+            autocomplete="off"
+            class="w-full border border-gray-300 rounded-md p-2">
+
+        <div id="listaCalles"
+            class="absolute bg-white border border-gray-300 rounded-md w-full mt-1 hidden max-h-48 overflow-y-auto z-50">
+        </div>
+        </div>
+
+        <input type="text" 
+        id="IdAltura" 
+        placeholder="Ingrese altura" 
+        autocomplete="off"
+        maxlength="5"
+        pattern="[0-9]*"  
+        inputmode="numeric"
+        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,8)"
+        class="border border-gray-300 rounded-md p-2 w-full md:w-40">
+
+        <button id="btnBuscar"
+        class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+        Buscar
+        </button>
+
+        </div>
+        </div>
+
+        
+        <div id="map"></div>
+
+        
+        <div id="info-panel" class="bg-white p-6 rounded-xl shadow-md opacity-0 transform -translate-y-4 hidden">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4 border-b pb-2">Información de la Calle</h2>
+            <div id="info-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                
+                 <div>
+                    <label for="nombre2" class="block text-sm font-medium text-gray-700">Nombre</label>
+                    <input type="text" id="nombre2" readonly class="info-input mt-1 block w-full rounded-md shadow-sm p-2">
+                </div>
+                 <div>
+                    <label for="desde" class="block text-sm font-medium text-gray-700">Desde</label>
+                    <input type="text" id="desde" readonly class="info-input mt-1 block w-full rounded-md shadow-sm p-2">
+                </div>
+                 <div>
+                    <label for="hasta" class="block text-sm font-medium text-gray-700">Hasta</label>
+                    <input type="text" id="hasta" readonly class="info-input mt-1 block w-full rounded-md shadow-sm p-2">
+                </div>
+                
+                <div>
+                    <label for="calle" class="block text-sm font-medium text-gray-700">Ancho Calle (mts) = Calzada + Veredas</label>
+                    <input type="text" id="calle" readonly class="info-input mt-1 block w-full rounded-md shadow-sm p-2">
+                </div>
+                 <div>
+                    <label for="calzada" class="block text-sm font-medium text-gray-700">Ancho Calzada (mts)</label>
+                    <input type="text" id="calzada" readonly class="info-input mt-1 block w-full rounded-md shadow-sm p-2">
+                </div>
+                <div>
+                    <label for="vereda" class="block text-sm font-medium text-gray-700">Ancho Vereda (mts)</label>
+                    <input type="text" id="vereda" readonly class="info-input mt-1 block w-full rounded-md shadow-sm p-2">
+                </div>
+                
+                <div class="lg:col-span-1">
+                    <label for="estado" class="block text-sm font-medium text-gray-700">Tipo de Calle</label>
+                    <input type="text" id="estado" readonly class="info-input mt-1 block w-full rounded-md shadow-sm p-2">
+                </div>
+
+                
+                <div class="col-span-1 md:col-span-2 lg:col-span-3">
+                    <label for="obs" class="block text-sm font-medium text-gray-700">Observaciones</label>
+                    <textarea id="obs" readonly rows="1" class="info-input mt-1 block w-full rounded-md shadow-sm p-2"></textarea>
+                </div>                
+                
+                <div class="col-span-1 md:col-span-2 lg:col-span-3">
+                    <label for="arbolado" class="block text-sm font-medium text-gray-700">Arbolado</label>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                        <textarea id="arbolado" readonly rows="7" class="info-input block w-full rounded-none rounded-l-md p-2 flex-1 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                        <button type="button" id="copy-button" title="Copiar al portapapeles" class="relative -ml-px inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-r-md text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200">
+                            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <span id="copy-button-text">Copiar</span>
+                        </button>
+                    </div>
+                </div>
+
+
+                <div class="col-span-1 md:col-span-2 lg:col-span-3 mt-3">
+                    <a href="https://drive.google.com/file/d/1736eJBNXj1QS6Y828KhTeWTqRjG-RhSS/view?usp=sharing"
+                    target="_blank"
+                    class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-md shadow transition-colors">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 16v4m0 0l-3-3m3 3l3-3M4 4h16v12H4z"/>
+                        </svg>
+
+                        Descargar guía de arbolado urbano
+                    </a>
+                </div>
+
+            </div>
+             <div id="info-placeholder" class="text-center text-gray-500 py-8">
+                <p>Seleccione una calle en el mapa para ver sus detalles.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        const initialCoords = [-30.9833, -64.0942];
+        const map = L.map('map').setView(initialCoords, 15);
+
+       
+        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 20
+        }).addTo(map); 
+
+        const googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+            maxZoom: 20,
+            subdomains:['mt0','mt1','mt2','mt3'],
+            attribution: 'Imágenes &copy; Google'
+        });
+
+        const baseMaps = {
+            "OpenStreetMap": osm,
+            "Google Satellite": googleSat
+        };
+
+        
+        L.control.layers(baseMaps).addTo(map);
+
+        
+
+        const wfsUrl = "https://idecor-ws.mapascordoba.gob.ar/geoserver/idecor/Jesus_Maria_Ejes_Calles/wfs" +
+            "?service=WFS&version=1.0.0&request=GetFeature&typeName=idecor:Jesus_Maria_Ejes_Calles" +
+            "&outputFormat=application/json&srsName=epsg:4326";
+
+
+        let geoJsonLayer; 
+        let selectedLayer = null; 
+
+
+        let callesDisponibles = [];
+        let featuresCalles = [];
+
+
+        
+        function getColor(estado) {
+            switch (estado) {
+                case 'ADOQUINADO':         return '#ffa200';
+                case 'PAVIMENTO FLEXIBLE': return '#b3b8d0';
+                case 'PAVIMENTO RIGIDO':   return '#667a84';
+                case 'RUTA NACIONAL':      return '#e31a1c';
+                case 'RUTA PROVINCIAL':    return '#eb4a4d';
+                case 'TIERRA':             return '#a86616';
+                
+            }
+        }
+
+        
+        const highlightStyle = {
+            color: "#f59e0b", 
+            weight: 5,
+            opacity: 1
+        };
+        
+        const selectedStyle = {
+            color: "#0819eb", 
+            weight: 7,
+            opacity: 1
+        };
+
+        
+        fetch(wfsUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta de la red');
+                }
+                return response.json(); 
+            })
+            .then(data => {
+                
+                
+                featuresCalles = data.features;
+
+                
+                const setCalles = new Set();
+
+                data.features.forEach(f => {
+                    if (f.properties.nombre2) {
+                        setCalles.add(f.properties.nombre2);
+                    }
+                });
+
+                callesDisponibles = [...setCalles].sort();
+
+                
+                
+                
+                
+                geoJsonLayer = L.geoJSON(data, {
+                    
+                    style: function(feature) {
+                        return {
+                            color: getColor(feature.properties.estado),
+                            weight: 4,
+                            opacity: 0.9
+                        };
+                    },
+                    
+                    onEachFeature: function (feature, layer) {
+                        
+                        layer.on({
+                            
+                            mouseover: function (e) {
+                                if (e.target !== selectedLayer) {
+                                    e.target.setStyle(highlightStyle);
+                                }
+                            },
+                            
+                            mouseout: function (e) {
+                                if (e.target !== selectedLayer) {
+                                    geoJsonLayer.resetStyle(e.target);
+                                }
+                            },
+                            
+                            click: function (e) {
+                                
+                                if (selectedLayer) {
+                                    geoJsonLayer.resetStyle(selectedLayer);
+                                }
+
+                                
+                                selectedLayer = e.target;
+                                selectedLayer.setStyle(selectedStyle);
+                                
+                                
+                                const properties = feature.properties;
+                                const infoPanel = document.getElementById('info-panel');
+                                const infoContent = document.getElementById('info-content');
+                                const infoPlaceholder = document.getElementById('info-placeholder');
+
+                                document.getElementById('nombre2').value = properties.nombre2 || 'No disponible';
+                                document.getElementById('desde').value = properties.desde || 'No disponible';
+                                document.getElementById('hasta').value = properties.hasta || 'No disponible';
+                                document.getElementById('estado').value = properties.estado || 'No disponible';
+                                document.getElementById('calle').value = properties.calle || 'No disponible';
+                                document.getElementById('calzada').value = properties.calzada || 'No disponible';
+                                document.getElementById('vereda').value = properties.vereda || 'No disponible';
+                                document.getElementById('arbolado').value = properties.arbolado || 'No disponible';
+                                document.getElementById('obs').value = properties.obs || 'No disponible';
+                                
+                                infoPlaceholder.classList.add('hidden');
+                                infoContent.classList.remove('hidden');
+                                if (infoPanel.classList.contains('hidden')) {
+                                    infoPanel.classList.remove('hidden');
+                                    setTimeout(() => {
+                                        infoPanel.classList.remove('opacity-0', 'transform', '-translate-y-4');
+                                    }, 10); 
+                                }
+                                
+                                
+                                map.fitBounds(e.target.getBounds().pad(0.1));
+
+                                
+                                infoPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                        });
+                    }
+                }).addTo(map);
+
+                
+                map.fitBounds(geoJsonLayer.getBounds());
+            })
+            .catch(error => {
+                
+                console.error('No se pudieron cargar los datos WFS:', error);
+                alert('Hubo un problema al cargar la capa de calles. Revisa la consola para más detalles.');
+            });
+            
+        
+        const legend = L.control({position: 'bottomright'});
+
+        legend.onAdd = function (map) {
+            const div = L.DomUtil.create('div', 'info legend bg-white p-3 rounded-md shadow-lg');
+            const grades = ['ADOQUINADO', 'PAVIMENTO FLEXIBLE', 'PAVIMENTO RIGIDO', 'RUTA NACIONAL', 'RUTA PROVINCIAL', 'TIERRA'];
+            
+            div.innerHTML += '<h4 class="font-bold mb-2 text-gray-800">Tipo de Calle</h4>';
+
+            for (let i = 0; i < grades.length; i++) {
+                div.innerHTML +=
+                    '<div class="flex items-center mb-1">' +
+                    '<i style="background:' + getColor(grades[i]) + '"></i> ' +
+                    '<span class="text-sm text-gray-700">' + grades[i] + '</span>' +
+                    '</div>';
+            }
+            return div;
+        };
+
+        legend.addTo(map);
+
+        const copyButton = document.getElementById('copy-button');
+        const copyButtonText = document.getElementById('copy-button-text');
+
+        const nombreCalleInput = document.getElementById('nombre2');
+        const desdeInput = document.getElementById('desde');
+        const hastaInput = document.getElementById('hasta');
+        const arboladoTextarea = document.getElementById('arbolado');
+
+        copyButton.addEventListener('click', () => {
+        const nombreCalle = nombreCalleInput.value;
+        const desde = desdeInput.value;
+        const hasta = hastaInput.value;
+        const arbolado = arboladoTextarea.value;
+
+        const textoParaCopiar = `Calle: ${nombreCalle} | Desde: ${desde} - Hasta: ${hasta}\n \n${arbolado}`;
+
+        navigator.clipboard.writeText(textoParaCopiar)
+            .then(() => {
+            copyButtonText.textContent = '¡Copiado!';
+            copyButton.classList.add('bg-green-100', 'text-green-700');
+
+            setTimeout(() => {
+                copyButtonText.textContent = 'Copiar';
+                copyButton.classList.remove('bg-green-100', 'text-green-700');
+            }, 2000);
+            })
+            .catch(err => {
+            console.error('Error al intentar copiar al portapapeles:', err);
+            copyButtonText.textContent = 'Error';
+            setTimeout(() => {
+                copyButtonText.textContent = 'Copiar';
+            }, 2000);
+            });
+        });
+
+
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.getElementById('info-content').classList.add('hidden');
+            document.getElementById('info-placeholder').classList.remove('hidden');
+        });
+
+
+        const inputCalle = document.getElementById("buscarCalle");
+        const listaCalles = document.getElementById("listaCalles");
+
+        inputCalle.addEventListener("input", () => {
+
+        const texto = inputCalle.value.toUpperCase();
+        listaCalles.innerHTML = "";
+
+        if (texto.length < 1) {
+        listaCalles.classList.add("hidden");
+        return;
+        }
+
+        const coincidencias = callesDisponibles.filter(c =>
+        c.toUpperCase().startsWith(texto)
+        );
+
+        coincidencias.slice(0,20).forEach(calle => {
+
+        const div = document.createElement("div");
+        div.textContent = calle;
+        div.className = "p-2 hover:bg-gray-100 cursor-pointer";
+
+        div.onclick = () => {
+        inputCalle.value = calle;
+        listaCalles.classList.add("hidden");
+        };
+
+        listaCalles.appendChild(div);
+
+        });
+
+        listaCalles.classList.remove("hidden");
+
+        });
+
+        function buscarSegmento(calle, altura){
+
+        const segmentos = featuresCalles.filter(f =>
+        f.properties.nombre2 === calle
+        );
+
+        if(segmentos.length === 0) return null;
+
+        for(let f of segmentos){
+
+        let desde = f.properties.desde;
+        let hasta = f.properties.hasta;
+
+        if(desde === "No disponible") desde = 0;
+        if(hasta === "No disponible") hasta = 99999;
+
+        desde = Number(desde);
+        hasta = Number(hasta);
+
+        if(altura >= desde && altura <= hasta){
+        return f;
+        }
+        }
+
+        return segmentos[0];
+
+        }
+
+
+        function seleccionarFeature(feature){
+
+        geoJsonLayer.eachLayer(layer => {
+
+        if(layer.feature === feature){
+
+        if (selectedLayer) {
+        geoJsonLayer.resetStyle(selectedLayer);
+        }
+
+        selectedLayer = layer;
+        selectedLayer.setStyle(selectedStyle);
+
+        layer.fire('click');
+
+        }
+
+        });
+
+        }
+
+
+        document.getElementById("btnBuscar").addEventListener("click", () => {
+
+        const calle = inputCalle.value.trim();
+        const altura = Number(document.getElementById("IdAltura").value);
+
+        if(!calle || !altura){
+        alert("Debe ingresar calle y altura");
+        return;
+        }
+
+        const feature = buscarSegmento(calle, altura);
+
+        if(!feature){
+        alert("No se encontró la calle");
+        return;
+        }
+
+        seleccionarFeature(feature);
+
+        });
+
+    </script>
+</body>
+</html>
