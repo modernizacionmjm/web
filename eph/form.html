@@ -1,3 +1,4 @@
+<!-- 06032026_1241 -->
 <!doctype html>
 <html lang="es">
 <head>
@@ -251,6 +252,22 @@
     }
     .hrItem.blue1{ color: var(--blue1); }
     .hrItem.blue2{ color: var(--blue2); }
+
+
+    /* BLOQUE C - etiquetas superiores en naranja suave */
+    .hrItem.orange1 {
+      background: #fff3e6;       /* naranja muy claro */
+      color: #b45309;            /* naranja oscuro elegante */
+      border-left: 4px solid #f59e0b;
+    }
+
+    .hrItem.orange2 {
+      background: #ffe5cc;       /* un poco más intenso */
+      color: #9a3412;            /* más profundo */
+      border-left: 4px solid #ea580c;
+    }
+
+
     .moreBox{
       margin-top: 12px;
       padding: 12px;
@@ -348,6 +365,54 @@
       font-size: 13px;
       opacity:.85;
     }
+
+    .input-disabled {
+      background-color: #f3f4f6;
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+
+    .tableWrap{
+      width:100%;
+      overflow:auto;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .searchTable{
+      width:100%;
+      border-collapse:collapse;
+      min-width: 560px;
+    }
+
+    .searchTable th,
+    .searchTable td{
+      padding:10px 12px;
+      text-align:left;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+
+    .searchTable th{
+      color: var(--orange2);
+      font-weight:900;
+      background: rgba(255,255,255,.04);
+    }
+
+    .searchTable tbody tr{
+      cursor:pointer;
+      transition: background .15s ease;
+    }
+
+    .searchTable tbody tr:hover{
+      background: rgba(42,163,255,.10);
+    }
+
+    .searchTable tbody tr.selected{
+      background: rgba(42,163,255,.18);
+    }
+
   </style>
 </head>
 <body>
@@ -426,13 +491,69 @@
         <div class="hint">Tip: el ID debe existir en la hoja <b>Data</b> del Sheet de Hoja de Ruta.</div>
       </div>
 
+
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <div class="label">Recuperar registro ya guardado en Bloque AyB</div>
+
+        <div class="row" style="gap:10px;">
+          <input type="text"
+            id="identAyBBuscarInput"
+            placeholder="Indique identificación única de vivienda"
+            autocomplete="off"
+            maxlength="8"
+            pattern="[0-9]*"
+            inputmode="numeric"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,8)">
+
+          <button class="btn btn-blue" id="btnBuscarAyBGuardado">Buscar</button>
+        </div>
+
+        <div class="hint">
+          Busca registros ya guardados en Bloque AyB para continuar con Bloque C o D.
+        </div>
+      </div>
+
+      <div class="error" id="aybSearchError"></div>
+
+      <div id="aybSearchWrap" style="display:none; margin-top:12px;">
+        <div class="label">Coincidencias encontradas</div>
+
+        <div class="tableWrap">
+          <table class="searchTable" id="aybSearchTable">
+            <thead>
+              <tr>
+                <th>ID BloqueAyB</th>
+                <th>Identificación única</th>
+                <th>Calle</th>
+                <th>Nro</th>
+              </tr>
+            </thead>
+            <tbody id="aybSearchBody"></tbody>
+          </table>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="label">Registro seleccionado</div>
+        <div class="hrList" id="aybRecoveredInfo"></div>
+      </div>
+
+
+
+
       <div class="error" id="hdrError"></div>
       <div class="okmsg" id="hdrOk"></div>
 
       <div class="divider"></div>
 
       <div id="hdrDataWrap" style="display:none;">
-        <div class="label">Datos del registro</div>
+
+        <!-- <div class="label">Datos del registro</div> -->
+        <div class="label" id="hdrPanelTitle">Datos del registro</div>
+
         <div class="hrList" id="hdrList"></div>
 
         <div class="row" style="margin-top:10px; justify-content:flex-start;">
@@ -443,15 +564,24 @@
 
         <div class="divider"></div>
 
-        <div class="label">Bloques</div>
+
+        <!-- <div class="label">Bloques</div> -->
+        <div class="label" id="hdrBlocksTitle">Bloques</div>
+
+
         <div class="blockBtns">
           <button class="btn btn-blue" id="btnBloqueAyB">Bloque AyB</button>
-          <button class="btn btn-ghost" disabled>Bloque C</button>
-          <button class="btn btn-ghost" disabled>Bloque D</button>
+
+          
+          <button class="btn btn-blue" id="btnBloqueC">Bloque C</button>
+
+          <!-- <button class="btn btn-ghost" disabled>Bloque D</button> -->
+          <button class="btn btn-blue" id="btnBloqueD">Bloque D</button>
+
           <button class="btn btn-ghost" disabled>Bloque E</button>
           <button class="btn btn-ghost" disabled>Bloque F</button>
         </div>
-        <!-- <div class="hint">Por ahora implementado: <b>Bloque AyB</b>. Los demás quedan listos para luego.</div> -->
+        
       </div>
     </section>
 
@@ -548,8 +678,8 @@
           <div class="label">9. Departamento o Casa</div>
           <select id="dptoCasaSel">
             <option value="">Seleccione...</option>
-            <option>Departamento</option>
             <option>Casa</option>
+            <option>Departamento</option>
             <option>Otro</option>
           </select>
           <input id="dptoCasaOtro" placeholder="ESPECIFIQUE" style="display:none; margin-top:10px;" />
@@ -708,8 +838,8 @@
           <option>Casa</option>
           <option>Departamento</option>
           <option>Pieza de Inquilinato</option>
-          <option>Pieza en Hotel/Pensión</option>
-          <option>Local no construido para habitación</option>
+          <option>Pieza en Hotel/Pension</option>
+          <option>Local no construido para habitacion</option>
           <option>Casilla</option>
           <option>Otro</option>
         </select>
@@ -727,7 +857,7 @@
         <div class="label">B.3. ¿Los pisos interiores son principalmente de ....</div>
         <select id="matpisosSel">
           <option value="">Seleccione...</option>
-          <option>Mosaico/baldosa/madera/cerámica/alfombra</option>
+          <option>Mosaico/baldosa/madera/ceramica/alfombra</option>
           <option>Cemento/ladrillo fijo</option>
           <option>Ladrillo suelto/tierra</option>
           <option>Otro</option>
@@ -740,11 +870,11 @@
         <select id="matcubextSel">
           <option value="">Seleccione...</option>
           <option>Pizarra /teja</option>
-          <option>Membrana/cubierta asfáltica</option>
+          <option>Membrana/cubierta asfaltica</option>
           <option>Baldosa/losa sin cubierta</option>
           <option>Chapa de metal sin cubierta</option>
           <option>Chapa de fibrocemento/plástico</option>
-          <option>Chapa de cartón</option>
+          <option>Chapa de carton</option>
           <option>Caña/tabla/paja con barro/paja sola</option>
           <option>N/S Depto. propiedad horizontal</option>
         </select>
@@ -752,18 +882,19 @@
 
       <div class="field">
         <div class="label">B.5. ¿El techo tiene revestimiento interior / cielorraso?</div>
-        <select id="revinttechSel">
+        <!-- <select id="revinttechSel">
           <option value="">Seleccione...</option>
           <option>SI</option>
           <option>NO</option>
-        </select>
+        </select> -->
+        <button class="siNoBtn" id="revinttechSel"></button>
       </div>
 
       <div class="field">
         <div class="label">B.6. ¿Tiene agua?</div>
         <select id="aguaSel">
           <option value="">Seleccione...</option>
-          <option>Por cañería dentro de la vivienda</option>
+          <option>Por cañeria dentro de la vivienda</option>
           <option>Fuera de la vivienda pero dentro del terreno</option>
           <option>Fuera del terreno</option>
         </select>
@@ -773,9 +904,9 @@
         <div class="label">B.7. ¿El agua es de ...</div>
         <select id="tipoaguaSel">
           <option value="">Seleccione...</option>
-          <option>Red pública (agua corriente)</option>
-          <option>Perforación con bomba a motor</option>
-          <option>Perforación con bomba manual</option>
+          <option>Red publica (agua corriente)</option>
+          <option>Perforacion con bomba a motor</option>
+          <option>Perforacion con bomba manual</option>
           <option>Otro</option>
         </select>
         <input id="tipoaguaOtro" placeholder="ESPECIFIQUE" style="display:none; margin-top:10px;" />
@@ -783,11 +914,12 @@
 
       <div class="field">
         <div class="label">B.8. ¿Tiene Baño/Letrina?</div>
-        <select id="banioSel">
+        <!-- <select id="banioSel">
           <option value="">Seleccione...</option>
           <option>SI</option>
           <option>NO</option>
-        </select>
+        </select> -->
+        <button class="siNoBtn" id="banioSel"></button>
       </div>
 
       <div class="row" style="justify-content:space-between; margin-top:10px;">
@@ -816,8 +948,8 @@
         <div class="label">B.10. ¿El baño tiene...</div>
         <select id="baniotieneSel">
           <option value="">Seleccione...</option>
-          <option>Inodoro con botón/mochila/cadena y arrastre de agua</option>
-          <option>Inodoro sin botón/cadena y con arrastre de agua (balde)</option>
+          <option>Inodoro con boton/mochila/cadena y arrastre de agua</option>
+          <option>Inodoro sin boton/cadena y con arrastre de agua (balde)</option>
           <option>Letrina (sin arrastre de agua)</option>
         </select>
       </div>
@@ -826,10 +958,10 @@
         <div class="label">B.11. ¿El desagüe del baño es...</div>
         <select id="desagbanioSel">
           <option value="">Seleccione...</option>
-          <option>A red pública? (cloaca)</option>
-          <option>A cámara septica y pozo ciego</option>
-          <option>Sólo a pozo ciego</option>
-          <option>A hoyo/excavación en la tierra</option>
+          <option>A red publica? (cloaca)</option>
+          <option>A camara septica y pozo ciego</option>
+          <option>Solo a pozo ciego</option>
+          <option>A hoyo/excavacion en la tierra</option>
         </select>
       </div>
 
@@ -850,8 +982,8 @@
         <select id="tipoelectSel">
           <option value="">Seleccione...</option>
           <option>Red</option>
-          <option>Generación propia a motor</option>
-          <option>Generación propia por otros medios</option>
+          <option>Generacion propia a motor</option>
+          <option>Generacion propia por otros medios</option>
           <option>No tiene</option>
         </select>
       </div>
@@ -863,6 +995,656 @@
 
       <div class="error" id="b3Error"></div>
       <div class="okmsg" id="b3Ok"></div>
+    </section>
+
+
+
+    <!-- ============== BLOQUE C - Grupo 1 ============== -->
+    <section class="screen" id="screenC_1">
+      <div class="titleOrange">ENCUESTA DE BIENESTAR - HOGAR -BLOQUE C</div>
+
+      <div class="hrList" id="cTopInfo"></div>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <div class="label">1. (A .1.)  Identificación única de vivienda (N° en el listado)</div>
+        <div class="hrItem blue1" id="cIdentShow">—</div>
+      </div>
+
+      <div class="field">
+        <div class="label">2. Hogar N°</div>
+        <input type="text"
+              id="cHogarNro"
+              placeholder="HOGAR N°"
+              autocomplete="off"
+              maxlength="8"
+              pattern="[0-9]*"
+              inputmode="numeric"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,8)">
+      </div>
+
+      <div class="field">
+        <div class="label">3. Respondente</div>
+        <input id="cRespondente" placeholder="RESPONDENTE" />
+      </div>
+
+      <div class="row" style="justify-content:space-between; margin-top:10px;">
+        <button class="btn btn-ghost" id="btnC1_HdR">Hoja de Ruta</button>
+        <button class="btn btn-orange" id="btnC1_Sig">Siguiente</button>
+      </div>
+
+      <div class="error" id="c1Error"></div>
+    </section>
+
+    <!-- ============== BLOQUE C - Grupo 2 ============== -->
+    <section class="screen" id="screenC_2">
+      <div class="titleOrange">CARACTERÍSTICAS HABITACIONALES DEL HOGAR</div>
+
+      <div class="field">
+        <div class="label">C.1. ¿Cuántos ambientes/ habitaciones tiene este hogar para su uso exclusivo?(excluyendo cocina, baño, pasillos, lavadero, garage)</div>
+        <input type="text" id="cCantAmbExcl" placeholder="CANTIDAD"
+              autocomplete="off" maxlength="8" pattern="[0-9]*" inputmode="numeric"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,8)">
+      </div>
+
+      <div class="field">
+        <div class="label">C.2. De ésos, ¿cuántos usan habitualmente para dormir?</div>
+        <input type="text" id="cCantAmbDor" placeholder="CANTIDAD"
+              autocomplete="off" maxlength="8" pattern="[0-9]*" inputmode="numeric"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,8)">
+      </div>
+
+      <div class="field">
+        <div class="label">C.3. ¿Utiliza alguno exclusivamente como lugar de trabajo? (para consultorio, estudio,taller, negocio, etc.)</div>
+        <button class="siNoBtn" id="btnC_excltr"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">C.4.1. ¿Tiene además cuarto de cocina?</div>
+        <button class="siNoBtn" id="btnC_tienecoc"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">C.4.2. ¿Tiene además lavadero?</div>
+        <button class="siNoBtn" id="btnC_lavadero"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">C.4.3. ¿Tiene además garage?</div>
+        <button class="siNoBtn" id="btnC_garage"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">C.5. De éstos ....... (nombre los “Si” de preg. 4) ¿usan alguno para dormir?</div>
+        <button class="siNoBtn" id="btnC_usodor"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">C.5.1 ¿Cuántos?</div>
+        <input type="text" id="cCantUsodor" placeholder="CANTIDAD"
+              autocomplete="off" maxlength="8" pattern="[0-9]*" inputmode="numeric"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,8)">
+      </div>
+
+      <div class="row" style="justify-content:space-between; margin-top:10px;">
+        <button class="btn btn-ghost" id="btnC2_Ant">Anterior</button>
+        <button class="btn btn-orange" id="btnC2_Sig">Siguiente</button>
+      </div>
+
+      <div class="error" id="c2Error"></div>
+    </section>
+
+    <!-- ============== BLOQUE C - Grupo 3 ============== -->
+    <section class="screen" id="screenC_3">
+      <div class="titleOrange">LUGAR DE TRABAJO</div>
+
+      <div class="field">
+        <div class="label">C.6. ¿ Utiliza alguno de éstos...... (nombre los “Si” de preg. 4) (cocina-lavadero-garage) exclusivamente como lugar de trabajo? (para consultorio, estudio, taller, negocio, etc.)</div>
+        <button class="siNoBtn" id="btnC_excltrestcons"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">C.6.1. Cuantos ambientes secundarios (Cocina, lavadero, garage usa exclusivamente como lugar de trabajo)</div>
+        <input type="text" id="cCantExcltrEstCons" placeholder="CANTIDAD"
+              autocomplete="off" maxlength="8" pattern="[0-9]*" inputmode="numeric"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,8)">
+      </div>
+
+      <div class="row" style="justify-content:space-between; margin-top:10px;">
+        <button class="btn btn-ghost" id="btnC3_Ant">Anterior</button>
+        <button class="btn btn-orange" id="btnC3_Sig">Siguiente</button>
+      </div>
+
+      <div class="error" id="c3Error"></div>
+    </section>
+
+    <!-- ============== BLOQUE C - Grupo 4 ============== -->
+    <section class="screen" id="screenC_4">
+      <div class="titleOrange">SITUACIÓN DEL OCUPANTE</div>
+
+      <div class="field">
+        <div class="label">C.7. ¿Este hogar es… (otra situación? (especificar en "Otros")</div>
+        <select id="cSithogSel">
+          <option value="">Seleccione...</option>
+          <option>Propietario de la vivienda y el terreno</option>
+          <option>Propietario de la vivienda solamente</option>
+          <option>Inquilino / arrendatario de la vivienda</option>
+          <option>Ocupante por pago de impuestos/expensas</option>
+          <option>Ocupante en relación de dependencia</option>
+          <option>Ocupante gratuito (con permiso)</option>
+          <option>Ocupante de hecho (sin permiso)</option>
+          <option>Está en sucesión</option>
+          <option>Otro</option>
+        </select>
+        <input id="cSithogOtro" placeholder="ESPECIFIQUE" style="display:none; margin-top:10px;" />
+      </div>
+
+      <div class="field">
+        <div class="label">C.8. ¿Para cocinar, utiliza principalmente…</div>
+        <select id="cCocinaSel">
+          <option value="">Seleccione...</option>
+          <option>Gas de red</option>
+          <option>Gas de tubo / garrafa</option>
+          <option>Kerosene / leña / carbón</option>
+          <option>Otro</option>
+        </select>
+        <input id="cCocinaOtro" placeholder="ESPECIFIQUE" style="display:none; margin-top:10px;" />
+      </div>
+
+      <div class="field">
+        <div class="label">C.9. ¿El baño es de …</div>
+        <select id="cUsoBanioSel">
+          <option value="">Seleccione...</option>
+          <option>Uso exclusivo del hogar</option>
+          <option>Compartido con otro/s hogar/es de la misma vivienda</option>
+          <option>Compartido con otra/s vivienda/s</option>
+          <option>No tiene baño (sólo para los que en encuesta de Vivienda Bloque B pregunta 8 dijeron “NO”)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">C.9.1 ¿Disponen de conexión a internet en el hogar?</div>
+        <button class="siNoBtn" id="btnC_connint"></button>
+      </div>
+
+      <div class="field" id="c92Wrap">
+        <div class="label">C.9.2. ¿Qué tipo de conexión dispone?</div>
+        <select id="cTipoConnSel">
+          <option value="">Seleccione...</option>
+          <option>Sólo FIJA (Incluye conexión por WiFi o satelital)</option>
+          <option>Sólo MÓVIL (Conexión por medio de red celular y puede pertenecer a cualquiera de los residentes)</option>
+          <option>Ambas</option>
+          <option>NS/NC</option>
+        </select>
+      </div>
+
+      <div class="row" style="justify-content:space-between; margin-top:10px;">
+        <button class="btn btn-ghost" id="btnC4_Ant">Anterior</button>
+        <button class="btn btn-orange" id="btnC4_Sig">Siguiente</button>
+      </div>
+
+      <div class="error" id="c4Error"></div>
+
+      
+      <div class="okmsg" id="c4Ok"></div>
+    </section>
+
+
+    <section class="screen" id="screenC_5">
+      <div class="titleOrange">C.10. JEFE DE HOGAR</div>
+
+      <div class="field">
+        <div class="label">C.10. ¿Quién es el jefe o jefa del hogar?(anote su nombre)</div>
+        <input id="cJefeHog" placeholder="JEFE/A DE HOGAR" />
+      </div>
+
+      <div class="row" style="justify-content:space-between; margin-top:10px;">
+        <button class="btn btn-ghost" id="btnC5_Ant">Anterior</button>
+        <button class="btn btn-orange" id="btnRegistrarC">Registrar Bloque C</button>
+      </div>
+
+      <div class="error" id="c5Error"></div>
+      <div class="okmsg" id="c5Ok"></div>
+    </section>
+
+
+    <!-- ============== BLOQUE D - Grupo 4 ============== -->
+    <section class="screen" id="screenD_1">
+      <div class="titleOrange">ENCUESTA DE BIENESTAR - PERSONAS - BLOQUE D</div>
+      <div class="hrList" id="dTopInfo"></div>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <div class="label">1. (A .1.) Identificación única de vivienda (N° en el listado)</div>
+        <div class="hrItem orange1" id="dIdentShow">—</div>
+      </div>
+
+      <div class="field">
+        <div class="label">2. Hogar N°</div>
+        <input type="text" id="dHogarNro"
+          placeholder="HOGAR N°" autocomplete="off" maxlength="8"
+          pattern="[0-9]*" inputmode="numeric"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,8)">
+      </div>
+
+      <div class="field">
+        <div class="label">3. Respondente</div>
+        <input id="dRespondente" placeholder="RESPONDENTE" />
+      </div>
+
+      <div class="field">
+        <div class="label">4. COMPONENTE N°</div>
+        <div class="hrItem orange2" id="dComponenteNroShow">—</div>
+      </div>
+
+      <div class="field">
+        <div class="label">5. NOMBRE DEL COMPONENTE</div>
+        <input id="dComponenteNom" placeholder="NOMBRE" />
+      </div>
+
+      <div class="field">
+        <div class="label">6. Entrevista realizada?</div>
+        <button class="siNoBtn" id="btnD_entrealiz"></button>
+      </div>
+
+      <div class="row" style="justify-content:space-between; margin-top:10px;">
+        <button class="btn btn-ghost" id="btnD1_HdR">Hoja de Ruta</button>
+        <button class="btn btn-orange" id="btnD1_Sig">Siguiente</button>
+      </div>
+
+      <div class="error" id="d1Error"></div>
+    </section>
+
+
+    <section class="screen" id="screenD_2">
+      <div class="titleOrange">CARACTERÍSTICAS DE LOS MIEMBROS DEL HOGAR</div>
+
+      <div class="field">
+        <div class="label">3. Relación de parentesco</div>
+        <select id="dRelparSel">
+          <option value="">Seleccione...</option>
+          <option>Jefe/a</option><option>Conyuge/Pareja</option><option>Hijo/a/Hijastro/a</option>
+          <option>Yerno/Nuera</option><option>Nieto/a</option><option>Madre/Padre</option>
+          <option>Suegro/a</option><option>Hermano/a</option><option>Otros Familiares</option><option>No Familiares</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">4. Sexo</div>
+        <select id="dSexoSel">
+          <option value="">Seleccione...</option>
+          <option>Varón</option>
+          <option>Mujer</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">5. ¿En que fecha nació?</div>
+        <input type="date" id="dFecNac" />
+      </div>
+
+      <div class="field">
+        <div class="label">6. ¿Cuántos años cumplidos tiene?</div>
+        <div class="hrItem orange2" id="dEdadShow">—</div>
+      </div>
+
+      <div class="field">
+        <div class="label">7. ¿Actualmente está?</div>
+        <select id="dEstCivSel">
+          <option value="">Seleccione...</option>
+          <option>Unido/a</option><option>Casado/a</option><option>Separado/a o Divorciado/a</option><option>Viudo/a</option><option>Soltero/a</option>
+        </select>
+      </div>
+
+      <div class="field"><div class="label" style="font-weight:700;">8. ¿Tiene algún plan de cobertura medica por la que paga o le descuentan?</div></div>
+
+      <div class="field">
+        <div class="label">Obra social (incluye PAMI)</div>
+        <button class="siNoBtn" id="btnD_tieneospami"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">Mutual / Prepaga/Servicio de Emergencia</div>
+        <button class="siNoBtn" id="btnD_tienemutprepservem"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">Planes y Seguros Públicos</div>
+        <button class="siNoBtn" id="btnD_tieneplaseg"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">¿Tiene dificultad permanente para…?</div>
+        <select id="dDifperSel">
+          <option value="">Seleccione...</option>
+          <option>Caminar o moverse</option>
+          <option>Ver (incluso con anteojos)</option>
+          <option>Oír (incluso con audífonos)</option>
+          <option>Hablar o comprenderse</option>
+          <option>Pensar..concentrarse..recordar</option>
+          <option>Realizar actividades de cuidado personal</option>
+          <option>Relacionarse con otras personas</option>
+          <option>Ninguna</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">¿Encuentra barreras en…?</div>
+        <select id="dEncbarrSel">
+          <option value="">Seleccione...</option>
+          <option>La vivienda</option>
+          <option>El transporte</option>
+          <option>Los servicios de salud o trabajo</option>
+          <option>Accesibilidad a dispositivos o adaptaciones (rampas..intérpretes..señalización..etc.)</option>
+          <option>Ningún lado</option>
+        </select>
+      </div>
+
+      <div class="row" style="justify-content:space-between; margin-top:10px;">
+        <button class="btn btn-ghost" id="btnD2_Ant">Anterior</button>
+        <button class="btn btn-orange" id="btnD2_Sig">Siguiente</button>
+      </div>
+
+      <div class="error" id="d2Error"></div>
+    </section>
+
+
+    <section class="screen" id="screenD_3">
+      <div class="titleOrange">SALUD</div>
+
+      <div class="field">
+        <div class="label">8.1 ¿En el último año consultó a un profesional de la salud?</div>
+        <button class="siNoBtn" id="btnD_consprofsal"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">8.2 La última consulta fue por ...?</div>
+        <select id="dMotultconsSel">
+          <option value="">Seleccione...</option>
+          <option>Dolencia/Afección/Enfermedad</option>
+          <option>Control/Prevención</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">8.3 Fue a través de ...?</div>
+        <select id="dMedultconsSel">
+          <option value="">Seleccione...</option>
+          <option>Guardia</option>
+          <option>Turno Programado</option>
+          <option>Consulta médica domiciliaria</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">8.4 Fue en un establecimiento....?</div>
+        <select id="dEstultconsSel">
+          <option value="">Seleccione...</option>
+          <option>Privado</option>
+          <option>Público Nacional</option>
+          <option>Público Provincial</option>
+          <option>Público Municipal</option>
+        </select>
+      </div>
+
+      <div class="row" style="justify-content:space-between; margin-top:10px;">
+        <button class="btn btn-ghost" id="btnD3_Ant">Anterior</button>
+        <button class="btn btn-orange" id="btnD3_Sig">Siguiente</button>
+      </div>
+
+      <div class="error" id="d3Error"></div>
+    </section>
+
+
+    <section class="screen" id="screenD_4">
+      <div class="titleOrange">EDUCACIÓN</div>
+
+      <div class="field">
+        <div class="label">9. ¿Sabe leer y escribir?</div>
+        <select id="dSableescrSel">
+          <option value="">Seleccione...</option>
+          <option>Sí</option>
+          <option>No</option>
+          <option>Menor a 2 años</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">10. ¿Asiste o asistió a algún establecimiento educativo/guardería?</div>
+        <select id="dAsistesteducSel">
+          <option value="">Seleccione...</option>
+          <option>Si asiste</option>
+          <option>No asiste pero asistió</option>
+          <option>Nunca asistió</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">11. Tipo de establecimiento</div>
+        <select id="dTipoestSel">
+          <option value="">Seleccione...</option>
+          <option>Público</option>
+          <option>Privado</option>
+          <option>Ns/Nc</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">12. ¿Cuál es el nivel mas alto que cursa o cursó?</div>
+        <select id="dNivmasalSel">
+          <option value="">Seleccione...</option>
+          <option>Inicial(Jardin..preescolar)</option>
+          <option>Primario (EGB 1 y EGB 2)</option>
+          <option>EGB 3</option>
+          <option>Secundario</option>
+          <option>Polimodal</option>
+          <option>Superior no universitario</option>
+          <option>Universitario</option>
+          <option>Posgrado universitario</option>
+          <option>Educación Especial (Discapacitados)</option>
+        </select>
+      </div>
+
+      <!-- <div class="field">
+        <div class="label">12.1 Ese Jardín o Preescolar es?</div>
+        <select id="dTipjarSel">
+          <option value="">Seleccione...</option>
+          <option>Guardería</option>
+          <option>Jardin de infantes</option>
+          <option>Sala Cuna</option>
+        </select>
+      </div> -->
+
+      <div class="field" id="dTipjarWrap" style="display:none;">
+        <div class="label">12.1 Ese Jardín o Preescolar es?</div>
+        <select id="dTipjarSel">
+          <option value="">Seleccione...</option>
+          <option>Guardería</option>
+          <option>Jardin de infantes</option>
+          <option>Sala Cuna</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">13. ¿Finalizó ese nivel?</div>
+        <select id="dFinjarSel">
+          <option value="">Seleccione...</option>
+          <option>Sí</option>
+          <option>No y continúa estudiando</option>
+          <option>No porque abandonó</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">14. ¿Cuál fue su último año aprobado?</div>
+        <select id="dUltanapSel">
+          <option value="">Seleccione...</option>
+          <option>Ninguno</option><option>Primero</option><option>Segundo</option><option>Tercero</option>
+          <option>Cuarto</option><option>Quinto</option><option>Sexto</option><option>Séptimo</option>
+          <option>Octavo</option><option>Noveno</option><option>Educación Especial</option><option>N/S N/R</option>
+        </select>
+      </div>
+
+      <div class="row" style="justify-content:space-between; margin-top:10px;">
+        <button class="btn btn-ghost" id="btnD4_Ant">Anterior</button>
+        <button class="btn btn-orange" id="btnD4_Sig">Siguiente</button>
+      </div>
+
+      <div class="error" id="d4Error"></div>
+    </section>
+
+
+    <section class="screen" id="screenD_5">
+      <div class="titleOrange">LUGAR DE NACIMIENTO</div>
+
+      <div class="field">
+        <div class="label">15. ¿Dónde nació?</div>
+        <select id="dDondeNacioSel">
+          <option value="">Seleccione...</option>
+          <option>En esta localidad</option>
+          <option>En otra localidad de esta provincia</option>
+          <option>En otra provincia (especificar)</option>
+          <option>En un país limítrofe (especificar)</option>
+          <option>En otro pais (especificar)</option>
+          <option>Ns/Nc</option>
+        </select>
+        <input id="dLugnacTxt" placeholder="ESPECIFIQUE" style="display:none; margin-top:10px;" />
+      </div>
+
+      <div class="field">
+        <div class="label">15.1 Provincia</div>
+        <!-- <select id="dProvnacSel"> ... (lista provincias) ... </select> -->
+        <select id="dProvnacSel">
+          <option value="">Seleccione...</option>
+          <option>Buenos Aires</option>
+          <option>CABA</option>
+          <option>Catamarca</option>
+          <option>Chaco</option>
+          <option>Chubut</option>
+          <option>Córdoba</option>
+          <option>Corrientes</option>
+          <option>Entre Ríos</option>
+          <option>Formosa</option>
+          <option>Jujuy</option>
+          <option>La Pampa</option>
+          <option>La Rioja</option>
+          <option>Mendoza</option>
+          <option>Misiones</option>
+          <option>Neuquén</option>
+          <option>Río Negro</option>
+          <option>Salta</option>
+          <option>San Juan</option>
+          <option>San Luis</option>
+          <option>Santa Cruz</option>
+          <option>Santa Fe</option>
+          <option>Santiago del Estero</option>
+          <option>Tierra del Fuego</option>
+          <option>Tucumán</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">15.2 País</div>
+        <select id="dPaisnacSel">
+          <option value="">Seleccione...</option>
+          <option>Argentina</option><option>Bolivia</option><option>Brasil</option><option>Chile</option>
+          <option>Paraguay</option><option>Uruguay</option><option>Otro</option>
+        </select>
+        <input id="dPaisnacOtro" placeholder="ESPECIFIQUE" style="display:none; margin-top:10px;" />
+      </div>
+
+      <div class="field">
+        <div class="label">16. ¿Dónde vivía hace 5 años?</div>
+        <select id="dDondeViviaSel">
+          <option value="">Seleccione...</option>
+          <option>En esta localidad</option>
+          <option>En otra localidad de esta provincia</option>
+          <option>En otra provincia ( especificar)</option>
+          <option>En un país limítrofe (especificar)</option>
+          <option>En otro pais (especificar)</option>
+          <option>No había nacido</option>
+          <option>Ns/Nc</option>
+        </select>
+        <input id="dLugviviaTxt" placeholder="ESPECIFIQUE" style="display:none; margin-top:10px;" />
+      </div>
+
+      <div class="field">
+        <div class="label">16.1 Provincia</div>
+        <!-- <select id="dProvviviaSel"> ... (lista provincias) ... </select> -->
+        <select id="dProvviviaSel">
+          <option value="">Seleccione...</option>
+          <option>Buenos Aires</option>
+          <option>CABA</option>
+          <option>Catamarca</option>
+          <option>Chaco</option>
+          <option>Chubut</option>
+          <option>Córdoba</option>
+          <option>Corrientes</option>
+          <option>Entre Ríos</option>
+          <option>Formosa</option>
+          <option>Jujuy</option>
+          <option>La Pampa</option>
+          <option>La Rioja</option>
+          <option>Mendoza</option>
+          <option>Misiones</option>
+          <option>Neuquén</option>
+          <option>Río Negro</option>
+          <option>Salta</option>
+          <option>San Juan</option>
+          <option>San Luis</option>
+          <option>Santa Cruz</option>
+          <option>Santa Fe</option>
+          <option>Santiago del Estero</option>
+          <option>Tierra del Fuego</option>
+          <option>Tucumán</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">16.2 País</div>
+        <select id="dPaisviviaSel">
+          <option value="">Seleccione...</option>
+          <option>Argentina</option><option>Bolivia</option><option>Brasil</option><option>Chile</option>
+          <option>Paraguay</option><option>Uruguay</option><option>Otro</option>
+        </select>
+        <input id="dPaisviviaOtro" placeholder="ESPECIFIQUE" style="display:none; margin-top:10px;" />
+      </div>
+
+      <div class="row" style="justify-content:space-between; margin-top:10px;">
+        <button class="btn btn-ghost" id="btnD5_Ant">Anterior</button>
+        <button class="btn btn-orange" id="btnD5_Sig">Siguiente</button>
+      </div>
+
+      <div class="error" id="d5Error"></div>
+    </section>
+
+
+
+    <section class="screen" id="screenD_6">
+      <div class="titleOrange">JUBILACIÓN</div>
+
+      <div class="field">
+        <div class="label">17. ¿Percibe Jubilación o pensión?</div>
+        <button class="siNoBtn" id="btnD_perjub"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">17.1 ¿Cuánto cobró por Jubilación o Pensión?</div>
+        <input type="text" id="dImpJub"
+          placeholder="IMPORTE" autocomplete="off" maxlength="12"
+          pattern="[0-9]*" inputmode="numeric"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,12)">
+      </div>
+
+      <div class="row" style="justify-content:space-between; margin-top:10px;">
+        <button class="btn btn-ghost" id="btnD6_Ant">Anterior</button>
+        <button class="btn btn-orange" id="btnRegistrarD">Registrar Bloque D</button>
+      </div>
+
+      <div class="error" id="d6Error"></div>
+      <div class="okmsg" id="d6Ok"></div>
     </section>
 
   </div>
@@ -890,7 +1672,13 @@
     gpsAuto: true,
     lastReverseKey: "",
     lat: null, lon: null,
-    latoper: null, lonoper: null
+    latoper: null, lonoper: null,
+    idBloqAyB: null,
+
+    // “ligas” para bloques C en adelante
+    calleAyB: "",
+    nroAyB: "",
+    pisoAyB: ""
   };
 
   /***********************
@@ -950,6 +1738,123 @@
     return `${dd}-${MM}-${yyyy}_${HH}:${mm}`;
   }
 
+  function nextFrame(){
+    return new Promise(r => requestAnimationFrame(() => r()));
+  }
+
+  async function countdownRedirect({
+    seconds = 5,
+    okElId = "b3Ok",
+    targetScreenId = "screenHdR",
+    prefix = "✅ Bloque AyB guardado.",
+    idText = "",
+  }){
+    const el = $(okElId);
+    el.style.display = "block";
+
+    for (let s = seconds; s >= 1; s--) {
+      el.textContent = `${prefix} ${idText} | Redirigiendo a Hoja de Ruta en ${s} segundos...`;
+      await new Promise(r => setTimeout(r, 1000));
+    }
+
+    // limpiar mensaje (opcional)
+    el.textContent = "";
+    el.style.display = "none";
+
+    showScreen(targetScreenId);
+  }
+
+
+  function clearHdrSelectionUI(){
+    $("hdrDataWrap").style.display = "none";
+    $("hdrList").innerHTML = "";
+    $("hdrMoreBox").innerHTML = "";
+    $("hdrMoreBox").style.display = "none";
+    setError("hdrError", "");
+    setOk("hdrOk", "");
+  }
+
+  function clearRecoveredAyBUI(){
+    $("aybSearchWrap").style.display = "none";
+    $("aybSearchBody").innerHTML = "";
+    $("aybRecoveredInfo").innerHTML = "";
+    setError("aybSearchError", "");
+  }
+
+
+
+  // function showBlockButtonsForMode(mode){
+  //   // mode: "hdr" | "aybRecovered"
+  //   $("hdrDataWrap").style.display = "block";
+
+  //   if(mode === "hdr"){
+  //     $("btnBloqueAyB").style.display = "";
+  //     $("btnBloqueC").style.display = "";
+  //     $("btnBloqueD").style.display = "";
+  //   }
+
+  //   if(mode === "aybRecovered"){
+  //     $("btnBloqueAyB").style.display = "none";
+  //     $("btnBloqueC").style.display = "";
+  //     $("btnBloqueD").style.display = "";
+  //   }
+  // }
+
+
+  // function showBlockButtonsForMode(mode){
+  //   $("hdrDataWrap").style.display = "block";
+
+  //   if(mode === "hdr"){
+  //     $("btnBloqueAyB").style.display = "";
+  //     $("btnBloqueC").style.display = "";
+  //     $("btnBloqueD").style.display = "";
+  //   }
+
+  //   if(mode === "aybRecovered"){
+  //     hideHdrInfoKeepButtons();
+  //     $("btnBloqueAyB").style.display = "none";
+  //     $("btnBloqueC").style.display = "";
+  //     $("btnBloqueD").style.display = "";
+  //   }
+  // }
+
+
+  function showBlockButtonsForMode(mode){
+    $("hdrDataWrap").style.display = "block";
+
+    if(mode === "hdr"){
+      $("hdrPanelTitle").style.display = "";
+      $("hdrBlocksTitle").style.display = "";
+      $("btnMore").style.display = "";
+      $("btnMore").parentElement.style.display = "";
+
+      $("btnBloqueAyB").style.display = "";
+      $("btnBloqueC").style.display = "";
+      $("btnBloqueD").style.display = "";
+    }
+
+    if(mode === "aybRecovered"){
+      hideHdrInfoKeepButtons();
+
+      $("hdrPanelTitle").style.display = "none";
+      $("btnMore").style.display = "none";
+      $("btnMore").parentElement.style.display = "none";
+      $("hdrBlocksTitle").style.display = "";
+
+      $("btnBloqueAyB").style.display = "none";
+      $("btnBloqueC").style.display = "";
+      $("btnBloqueD").style.display = "";
+    }
+  }
+
+
+  function hideHdrInfoKeepButtons(){
+    $("hdrList").innerHTML = "";
+    $("hdrMoreBox").innerHTML = "";
+    $("hdrMoreBox").style.display = "none";
+  }
+
+
   /***********************
    * BotonSi/No
    ***********************/
@@ -962,11 +1867,11 @@
     btn.addEventListener("click", () => {
       const t = (btn.textContent || "").trim();
       if(t === ""){
-        btn.textContent = "Si";
+        btn.textContent = "SI";
         btn.classList.add("state-si");
         btn.classList.remove("state-no");
-      } else if(t === "Si"){
-        btn.textContent = "No";
+      } else if(t === "SI"){
+        btn.textContent = "NO";
         btn.classList.add("state-no");
         btn.classList.remove("state-si");
       } else {
@@ -993,6 +1898,7 @@
       const ipData = await ipResponse.json();
       const rawIp = ipData.ip || '';
       ipAddress = rawIp.match(/\d{1,3}(\.\d{1,3}){3}/)?.[0] || 'Inválida';
+      
     } catch (err) {
       console.log("Error obteniendo IP:", err);
       ipAddress = 'Sin conexión';
@@ -1087,6 +1993,24 @@
     return info;
   }
 
+  async function refreshClientInfo(){
+    try{
+      await loadIp();
+
+      const deviceInfoGlobal = await getClientProperties();
+
+      state.deviceInfoGlobal = deviceInfoGlobal;
+
+      console.log(state.ipAddress);
+      //console.log("Device info actualizado:", deviceInfoGlobal);
+      console.log(`DeviceID: ${state.deviceInfoGlobal["Fingerprint"]} | Browser: ${state.deviceInfoGlobal["Navegador"]}`);
+
+
+    }catch(err){
+      console.error("Error actualizando IP/Device:", err);
+    }
+  }
+
   /***********************
    * Login
    ***********************/
@@ -1110,27 +2034,6 @@
     });
     return `${base}?${params.toString()}`;
   }
-
-  // async function buscarHdR(idHdr){
-  //   const url = buildGvizUrl(state.sheetHdRId, idHdr);
-  //   console.log(url);
-  //   const resp = await fetch(url, { cache:"no-cache" });
-  //   const csv = await resp.text();
-
-  //   const parsed = Papa.parse(csv, { skipEmptyLines: true });
-  //   // gviz out:csv devuelve directamente filas sin encabezados en muchos casos.
-  //   // Si no hay resultados: parsed.data podría ser [] o [["..."]] con mensaje; validamos.
-  //   const rows = parsed.data || [];
-  //   // Si el primer campo no parece numérico, probablemente no encontró.
-  //   const firstRow = rows[0];
-  //   if(!firstRow || firstRow.length < 2) return null;
-
-  //   const maybeId = String(firstRow[0] ?? "").trim();
-  //   if(!/^\d+$/.test(maybeId)) return null;
-
-  //   return firstRow;
-  // }
-
 
   async function buscarHdR(idHdr){
     const url = buildGvizUrl(state.sheetHdRId, idHdr);
@@ -1295,8 +2198,10 @@
       attribution: "Imagery © Google"
     });
 
-    const baseLayers = { "OSM": osm, "Google Satellite": googleSat };
+    const baseLayers = { "OpenStreetMap": osm, "Google Satellite": googleSat };
     L.control.layers(baseLayers, null, { position: "topright", collapsed: true }).addTo(map);
+
+
 
     // Marker azul bien visible
     const blueIcon = L.divIcon({
@@ -1371,8 +2276,7 @@
       m.keyboard.enable();
       if(m.tap) m.tap.enable();
       $("gpsState").textContent = "(modo manual: mapa desbloqueado)";
-      // marker no draggable (para iphone es más cómodo click en mapa)
-      // pero si querés draggable después, lo activamos.
+
     }
   }
 
@@ -1464,13 +2368,10 @@
       const road = (a.road || a.pedestrian || a.footway || a.path || "").toString().trim();
       const house = (a.house_number || "").toString().trim();
 
-      // solo autocompletar si está vacío o si gpsAuto está ON (para que no le pise cambios manuales)
-      if(state.gpsAuto || !$("calleInput").value.trim()){
-        if(road) $("calleInput").value = road.toUpperCase().replace(/[^A-ZÁÉÍÓÚÜÑ\s\.\-]/g, "");
-      }
-      if(state.gpsAuto || !$("nroInput").value.trim()){
-        if(house) $("nroInput").value = house.replace(/[^0-9]/g,"").slice(0,8);
-      }
+      // ✅ Autocompletar SIEMPRE (GPS auto o modo manual): reemplaza el contenido siempre
+      if (road) $("calleInput").value = road.toUpperCase().replace(/[^A-ZÁÉÍÓÚÜÑ\s\.\-]/g, "");
+      if (house) $("nroInput").value = house.replace(/[^0-9]/g, "").slice(0, 8);
+
 
     } catch(err){
       console.log("Reverse geocode error:", err);
@@ -1481,6 +2382,45 @@
    * Validaciones
    ***********************/
   function requireNonEmpty(val){ return String(val || "").trim().length > 0; }
+
+  function upperTxt(v){
+    return String(v ?? "").trim().toUpperCase();
+  }
+  function upperTxtKeep(v){
+    // por si querés NO trim en algún caso; hoy no lo necesitamos
+    return String(v ?? "").toUpperCase();
+  }
+
+
+
+
+  // Render del encabezado azul con datos en memoria
+  function renderCTopInfo(){
+    const h = state.hdr;
+
+    const items = [
+      ["Identificación única de vivienda (A.1)", h.identviv],  // payload ident
+      ["Fracción", h.fraccion],
+      ["Radio", h.radio],
+      ["Manzana", h.manzana],
+      ["Lado", h.lado],
+      ["Calle", state.calleAyB || $("calleInput")?.value || ""],
+      ["Nº", state.nroAyB || $("nroInput")?.value || ""],
+      ["Piso", state.pisoAyB || $("pisoInput")?.value || ""],
+      ["ID BloqueAyB", state.idBloqAyB || ""],
+    ];
+
+    $("cTopInfo").innerHTML = "";
+    items.forEach((pair, idx) => {
+      const div = document.createElement("div");
+      //div.className = "hrItem " + (idx % 2 === 0 ? "blue1" : "blue2");
+      div.className = "hrItem " + (idx % 2 === 0 ? "orange1" : "orange2");
+      div.textContent = `${pair[0]}: ${pair[1] ?? ""}`;
+      $("cTopInfo").appendChild(div);
+    });
+
+    $("cIdentShow").textContent = h.identviv || "—";
+  }
 
   function getDptoCasaPayload(){
     const v = $("dptoCasaSel").value;
@@ -1527,7 +2467,7 @@
       calle: $("calleInput").value.trim(),
       nro: $("nroInput").value.trim(),
       piso: $("pisoInput").value.trim(),
-      dptocasa: getDptoCasaPayload(),
+      dptocasa: upperTxt(getDptoCasaPayload()),
       descr: $("descrInput").value.trim(),
       anio: String(new Date().getFullYear()),
       trimestre: state.hdr.trimestre,
@@ -1540,6 +2480,7 @@
       zonainund: botonSiNoValue("btnZonaInund"),
       villaemerg: botonSiNoValue("btnVillaEmerg"),
       compartengastos: botonSiNoValue("btnCompartenGastos"),
+      
 
       nrohogares: $("nrohogaresInput").value.trim(),
       tel1: $("tel1Input").value.trim(),
@@ -1548,20 +2489,22 @@
       pensionistas: botonSiNoValue("btnPensionistas"),
 
       // ===== Bloque B =====
-      tipoviv: getOtroPayload("tipovivSel","tipovivOtro"),
+      tipoviv: upperTxt(getOtroPayload("tipovivSel","tipovivOtro")),
       cantamb: $("cantambInput").value.trim(),
-      matpisos: getOtroPayload("matpisosSel","matpisosOtro"),
-      matcubext: $("matcubextSel").value,
-      revinttech: $("revinttechSel").value,
-      agua: $("aguaSel").value,
-      tipoagua: getOtroPayload("tipoaguaSel","tipoaguaOtro"),
-      banio: $("banioSel").value,
+      matpisos: upperTxt(getOtroPayload("matpisosSel","matpisosOtro")),
+      matcubext: upperTxt($("matcubextSel").value),
+      //revinttech: $("revinttechSel").value,
+      revinttech: botonSiNoValue("revinttechSel"),
+      agua: upperTxt($("aguaSel").value),
+      tipoagua: upperTxt(getOtroPayload("tipoaguaSel","tipoaguaOtro")),
+      //banio: $("banioSel").value,
+      banio: botonSiNoValue("banioSel"),
 
-      banioesta: $("banioestaSel").value,
-      baniotiene: $("baniotieneSel").value,
-      desagbanio: $("desagbanioSel").value,
+      banioesta: upperTxt($("banioestaSel").value),
+      baniotiene: upperTxt($("baniotieneSel").value),
+      desagbanio: upperTxt($("desagbanioSel").value),
 
-      tipoelect: $("tipoelectSel").value,
+      tipoelect: upperTxt($("tipoelectSel").value),
 
       // ===== Auditoría =====
       fechahora: nowFechaHora(),
@@ -1569,10 +2512,120 @@
       dispositivo: `DeviceID: ${state.deviceInfoGlobal["Fingerprint"]} | Browser: ${state.deviceInfoGlobal["Navegador"]}`
     };
 
-    const resp = await fetch(scriptUrl, { method:"POST", body: JSON.stringify(payload) });
+    console.log(payload);
+    
+    //const resp = await fetch(scriptUrl, { method:"POST", body: JSON.stringify(payload) });
+    const resp = await fetch(scriptUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
     const res = await resp.json();
     return res;
   }
+
+
+  async function postBloqueC(){
+
+    const tipoconnVal = ($("c92Wrap").style.display === "none") ? "" : (upperTxt($("cTipoConnSel").value) || "");
+
+    const payload = {
+      nomBloque: "BloqueC",
+
+      // Liga BloqueAyB
+      idbloqayb: String(state.idBloqAyB || ""),
+
+      // Datos en memoria (C y siguientes)
+      ident: String(state.hdr.identviv || ""),               // Identificación única vivienda
+      fraccionbloqayb: String(state.hdr.fraccion || ""),
+      radiobloqayb: String(state.hdr.radio || ""),
+      manzanabloqayb: String(state.hdr.manzana || ""),
+      ladobloqayb: String(state.hdr.lado || ""),
+
+      callebloqayb: upperTxt(state.calleAyB || ""),
+      nrobloqayb: String(state.nroAyB || "").trim(),
+      pisobloqayb: upperTxt(state.pisoAyB || ""),
+
+      // Preguntas Bloque C
+      hogarnro: String($("cHogarNro").value.trim()),
+      respondente: upperTxt($("cRespondente").value),
+
+      cantambexcl: String($("cCantAmbExcl").value.trim()),
+      cantambdor: String($("cCantAmbDor").value.trim()),
+      excltr: ($("btnC_excltr").textContent || "").trim(),
+
+      tienecoc: ($("btnC_tienecoc").textContent || "").trim(),
+      lavadero: ($("btnC_lavadero").textContent || "").trim(),
+      garage: ($("btnC_garage").textContent || "").trim(),
+
+      usodor: ($("btnC_usodor").textContent || "").trim(),
+      cantusodor: String($("cCantUsodor").value.trim()),
+
+      excltrestcons: ($("btnC_excltrestcons").textContent || "").trim(),
+      cantexcltrestcons: String($("cCantExcltrEstCons").value.trim()),
+
+      sithog: upperTxt(getOtroPayload("cSithogSel","cSithogOtro")),
+      cocinar: upperTxt(getOtroPayload("cCocinaSel","cCocinaOtro")), // en tu script se llama "cocinar"
+      usobanio: upperTxt(String($("cUsoBanioSel").value || "")),
+
+      connint: ($("btnC_connint").textContent || "").trim(),
+      //tipoconn: upperTxt(String($("cTipoConnSel").value || "")),
+      tipoconn: tipoconnVal,
+
+      jefehog: upperTxt($("cJefeHog").value),
+
+      // Auditoría
+      fechahora: nowFechaHora(),
+      ip: state.ipAddress,
+      dispositivo: `DeviceID: ${state.deviceInfoGlobal["Fingerprint"]} | Browser: ${state.deviceInfoGlobal["Navegador"]}`
+    };
+
+    console.log(payload);
+
+    const resp = await fetch(scriptUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    return await resp.json();
+  }
+
+  
+
+  $("btnRegistrarC").addEventListener("click", async () => {
+    setError("c5Error","");
+    setOk("c5Ok","");
+
+    if(!$("cJefeHog").value.trim()) return setError("c5Error","Responda C.10.");
+
+    //showOverlay("Registrando Bloque C", "Enviando datos...");
+    showOverlay("Registrando Bloque C", "Enviando datos al Servidor...");
+
+    try{
+      const res = await postBloqueC();
+
+      if(res?.success){
+        if(res?.id) state.idBloqAyB = String(res.id);
+
+        hideOverlay();
+        await countdownRedirect({
+          seconds: 5,
+          okElId: "c5Ok",
+          targetScreenId: "screenHdR",
+          prefix: "✅ Bloque C guardado.",
+          idText: `ID BloqueAyB: ${state.idBloqAyB || ""}`
+        });
+        return;
+      } else {
+        setError("c5Error","El servidor respondió sin success:true.");
+      }
+    } catch(err){
+      console.log(err);
+      setError("c5Error","Error registrando Bloque C. Revise worker / Apps Script.");
+    } finally {
+      hideOverlay();
+    }
+  });
 
   /***********************
    * Event wiring
@@ -1611,9 +2664,12 @@
   });
 
   $("btnBuscarHdR").addEventListener("click", async () => {
-    setError("hdrError","");
-    setOk("hdrOk","");
-    $("hdrDataWrap").style.display = "none";
+    // setError("hdrError","");
+    // setOk("hdrOk","");
+    // $("hdrDataWrap").style.display = "none";
+
+    clearHdrSelectionUI();
+    clearRecoveredAyBUI();
 
     const idHdr = $("IdHdRInput").value.trim();
     if(!idHdr){
@@ -1625,7 +2681,6 @@
       return;
     }
 
-    //showOverlay("Buscando registro en Hoja de Ruta", "Consultando hoja Data (GVIZ)...");
     showOverlay("Buscando registro en Hoja de Ruta", "Consultando Hoja de Ruta");
     try{
       const row = await buscarHdR(idHdr);
@@ -1636,6 +2691,9 @@
       state.hdrRow = row;
       state.hdr = mapHdrRowToObj(row);
       renderHdR();
+
+      showBlockButtonsForMode("hdr");
+
       setOk("hdrOk","✅ Registro encontrado.");
 
       // precargar campos del Bloque AyB (solo vistas)
@@ -1664,13 +2722,81 @@
     box.style.display = (box.style.display === "flex") ? "none" : "flex";
   });
 
-  $("btnBloqueAyB").addEventListener("click", () => {
-    if(!state.hdr?.idhdr){
-      setError("hdrError","Primero busque y seleccione un registro de Hoja de Ruta.");
+
+
+  function hasRegistroBaseCargado(){
+    return !!(
+      state &&
+      state.hdr &&
+      String(state.hdr.identviv || "").trim() &&
+      String(state.idBloqAyB || "").trim()
+    );
+  }
+
+  // //$("btnBloqueAyB").addEventListener("click", () => {
+  // $("btnBloqueAyB").addEventListener("click", async () => {
+  //   if(!state.hdr?.idhdr){
+  //     setError("hdrError","Primero busque y seleccione un registro de Hoja de Ruta.");
+  //     return;
+  //   }
+    
+  //   await refreshClientInfo();
+
+  //   showScreen("screenAyB_1");
+  // });
+
+
+  // $("btnBloqueAyB").addEventListener("click", async () => {
+  //   if(!state.hdr?.identviv){
+  //     setError("hdrError","Primero busque un registro de Hoja de Ruta o recupere uno guardado en Bloque AyB.");
+  //     return;
+  //   }
+
+  //   await refreshClientInfo();
+
+  //   // si vino de recuperación, también dejamos precargadas las vistas
+  //   if($("identvivShow")) $("identvivShow").value = state.hdr.identviv || "";
+  //   if($("participacionShow")) $("participacionShow").value = state.hdr.participacion || "";
+  //   if($("fraccionShow")) $("fraccionShow").value = state.hdr.fraccion || "";
+  //   if($("radioShow")) $("radioShow").value = state.hdr.radio || "";
+  //   if($("manzanaShow")) $("manzanaShow").value = state.hdr.manzana || "";
+  //   if($("ladoShow")) $("ladoShow").value = state.hdr.lado || "";
+  //   if($("trimestreShow")) $("trimestreShow").value = state.hdr.trimestre || "";
+  //   if($("semrefShow")) $("semrefShow").value = state.hdr.semref || "";
+
+  //   showScreen("screenAyB_1");
+  // });
+
+
+  $("btnBloqueAyB").addEventListener("click", async () => {
+    setError("hdrError", "");
+    setError("aybSearchError", "");
+
+    if(!state.hdr?.identviv){
+      setError("hdrError","Primero busque un registro de Hoja de Ruta o recupere uno guardado en Bloque AyB.");
       return;
     }
+
+    await refreshClientInfo();
+
+    // Precarga de cabecera AyB
+    if($("identvivShow"))      $("identvivShow").value = state.hdr.identviv || "";
+    if($("participacionShow")) $("participacionShow").value = state.hdr.participacion || "";
+    if($("fraccionShow"))      $("fraccionShow").value = state.hdr.fraccion || "";
+    if($("radioShow"))         $("radioShow").value = state.hdr.radio || "";
+    if($("manzanaShow"))       $("manzanaShow").value = state.hdr.manzana || "";
+    if($("ladoShow"))          $("ladoShow").value = state.hdr.lado || "";
+    if($("trimestreShow"))     $("trimestreShow").value = state.hdr.trimestre || "";
+    if($("semrefShow"))        $("semrefShow").value = state.hdr.semref || "";
+
+    // Si vino de recuperación, también precargamos ubicación
+    if($("calleInput") && state.calleAyB) $("calleInput").value = state.calleAyB;
+    if($("nroInput")   && state.nroAyB)   $("nroInput").value = state.nroAyB;
+    if($("pisoInput")  && state.pisoAyB)  $("pisoInput").value = state.pisoAyB;
+
     showScreen("screenAyB_1");
   });
+
 
   // Bloque AyB nav
   $("btnAyB1_HdR").addEventListener("click", () => showScreen("screenHdR"));
@@ -1755,11 +2881,22 @@
     if(!requireNonEmpty($("matpisosSel").value)) return setError("b1Error","Responda B.3.");
     if($("matpisosSel").value === "Otro" && !requireNonEmpty($("matpisosOtro").value)) return setError("b1Error","Especifique B.3 (Otro).");
     if(!requireNonEmpty($("matcubextSel").value)) return setError("b1Error","Responda B.4.");
-    if(!requireNonEmpty($("revinttechSel").value)) return setError("b1Error","Responda B.5.");
+    //if(!requireNonEmpty($("revinttechSel").value)) return setError("b1Error","Responda B.5.");
     if(!requireNonEmpty($("aguaSel").value)) return setError("b1Error","Responda B.6.");
     if(!requireNonEmpty($("tipoaguaSel").value)) return setError("b1Error","Responda B.7.");
     if($("tipoaguaSel").value === "Otro" && !requireNonEmpty($("tipoaguaOtro").value)) return setError("b1Error","Especifique B.7 (Otro).");
-    if(!requireNonEmpty($("banioSel").value)) return setError("b1Error","Responda B.8.");
+    //if(!requireNonEmpty($("banioSel").value)) return setError("b1Error","Responda B.8.");
+
+    const requiredBtns = [
+      ["revinttechSel","Revestimiento interior del techo"],
+      ["banioSel","Baño o letrina"]
+    ];
+    for(const [id,label] of requiredBtns){
+      if(!requireNonEmpty(botonSiNoValue(id))){
+        return setError("b1Error",`Complete BotonSi/No: ${label} (Si/No).`);
+      }
+    }
+
 
     showScreen("screenB_2");
   });
@@ -1775,13 +2912,18 @@
 
   $("btnB3_Ant").addEventListener("click", () => showScreen("screenB_2"));
 
-  $("btnRegistrarAyB").addEventListener("click", async () => {
+
+    $("btnRegistrarAyB").addEventListener("click", async () => {
     setError("b3Error","");
     setOk("b3Ok","");
 
     if(!requireNonEmpty($("tipoelectSel").value)) return setError("b3Error","Responda B.12.");
 
-    // también me quedo con latoper/lonoper “silencioso” en el momento de registrar
+    // ✅ mostrar overlay INMEDIATO
+    showOverlay("Registrando Bloque AyB", "Preparando datos...");
+    await nextFrame(); // fuerza el repintado (spinner aparece ya)
+
+    // capturar latoper/lonoper silencioso lo antes posible
     if(navigator.geolocation){
       try{
         const p = await new Promise((resolve, reject) =>
@@ -1792,21 +2934,158 @@
       } catch(e){}
     }
 
-    showOverlay("Registrando Bloque AyB", "Enviando datos al App Script (worker)...");
     try{
+      $("overlaySub").textContent = "Enviando datos al Servidor...";
+
       const res = await postBloqueAyB();
-      if(res?.success){
-        setOk("b3Ok","✅ Registro guardado correctamente (success: true).");
+
+
+    if(res?.success){
+      if(res?.id){
+        state.idBloqAyB = String(res.id);
+
+        state.calleAyB = $("calleInput").value.trim();
+        state.nroAyB   = $("nroInput").value.trim();
+        state.pisoAyB  = $("pisoInput").value.trim();
+
+        // ocultamos overlay antes del countdown para que se vea el mensaje
+        hideOverlay();
+
+        // countdown 5s + redirección a hoja de ruta
+        await countdownRedirect({
+          seconds: 5,
+          okElId: "b3Ok",
+          targetScreenId: "screenHdR",
+          prefix: "✅ Bloque AyB guardado.",
+          idText: `ID BloqueAyB: ${state.idBloqAyB}`
+        });
+
+        return; // salimos, ya redirigió
       } else {
-        setError("b3Error","El servidor respondió sin success:true. Revise el worker / script.");
+        setOk("b3Ok", "✅ Guardado, pero no llegó el ID (res.id vacío).");
       }
+    } else {
+      setError("b3Error","El servidor respondió sin success:true.");
+    }
+
     } catch(err){
       console.log(err);
-      setError("b3Error","Error registrando. Revise conexión o CORS del worker.");
+      setError("b3Error","Error registrando. Revise conexión o worker.");
     } finally {
       hideOverlay();
     }
   });
+
+
+  // //$("btnBloqueC").addEventListener("click", () => {
+  // $("btnBloqueC").addEventListener("click", async () => {
+  //   // No bloqueamos navegación (como pediste), solo cargamos datos
+  //   renderCTopInfo();
+
+  //   await refreshClientInfo();
+
+  //   // Si querés, podríamos precargar respondente del AyB, pero por ahora no
+  //   showScreen("screenC_1");
+
+  // });
+
+
+  $("btnBloqueC").addEventListener("click", async () => {
+    setError("hdrError", "");
+    setError("aybSearchError", "");
+
+    if(!hasRegistroBaseCargado()){
+      setError("hdrError","Primero busque un registro de Hoja de Ruta o recupere uno guardado en Bloque AyB.");
+      return;
+    }
+
+    await refreshClientInfo();
+
+    renderCTopInfo();
+    showScreen("screenC_1");
+  });
+
+
+
+  // Volver a Hoja de Ruta
+  $("btnC1_HdR").addEventListener("click", () => showScreen("screenHdR"));
+
+  // C1 -> C2
+  $("btnC1_Sig").addEventListener("click", () => {
+    setError("c1Error","");
+
+    if(!$("cHogarNro").value.trim()) return setError("c1Error","Ingrese Hogar N°.");
+    if(!$("cRespondente").value.trim()) return setError("c1Error","Ingrese Respondente.");
+
+    showScreen("screenC_2");
+  });
+
+  // C2 nav
+  $("btnC2_Ant").addEventListener("click", () => showScreen("screenC_1"));
+  $("btnC2_Sig").addEventListener("click", () => {
+    setError("c2Error","");
+
+    if(!$("cCantAmbExcl").value.trim()) return setError("c2Error","Responda C.1.");
+    if(!$("cCantAmbDor").value.trim()) return setError("c2Error","Responda C.2.");
+
+    const reqBtns = [
+      ["btnC_excltr","C.3"],
+      ["btnC_tienecoc","C.4.1"],
+      ["btnC_lavadero","C.4.2"],
+      ["btnC_garage","C.4.3"],
+      ["btnC_usodor","C.5"],
+    ];
+    for(const [id, lab] of reqBtns){
+      if(!($(id).textContent || "").trim()) return setError("c2Error",`Complete BotonSi/No ${lab} (Si/No).`);
+    }
+
+    if(!$("cCantUsodor").value.trim()) return setError("c2Error","Responda C.5.1.");
+    showScreen("screenC_3");
+  });
+
+  // C3 nav
+  $("btnC3_Ant").addEventListener("click", () => showScreen("screenC_2"));
+  $("btnC3_Sig").addEventListener("click", () => {
+    setError("c3Error","");
+
+    if(!($("btnC_excltrestcons").textContent || "").trim()) return setError("c3Error","Complete BotonSi/No C.6 (Si/No).");
+    if(!$("cCantExcltrEstCons").value.trim()) return setError("c3Error","Responda C.6.1.");
+
+    onEnterC4();
+    showScreen("screenC_4");
+  });
+
+  // C4 nav
+  $("btnC4_Ant").addEventListener("click", () => showScreen("screenC_3"));
+
+
+  $("btnC4_Sig").addEventListener("click", () => {
+    setError("c4Error","");
+
+    if(!$("cSithogSel").value) return setError("c4Error","Responda C.7.");
+    if($("cSithogSel").value === "Otro" && !$("cSithogOtro").value.trim())
+      return setError("c4Error","Especifique C.7 (Otro).");
+
+    if(!$("cCocinaSel").value) return setError("c4Error","Responda C.8.");
+    if($("cCocinaSel").value === "Otro" && !$("cCocinaOtro").value.trim())
+      return setError("c4Error","Especifique C.8 (Otro).");
+
+    if(!$("cUsoBanioSel").value) return setError("c4Error","Responda C.9.");
+
+    const c91 = ($("btnC_connint").textContent || "").trim();
+    if(!c91) return setError("c4Error","Complete C.9.1 (Si/No).");
+
+    // C.9.2 obligatorio solo si C.9.1 = Si (visible)
+    syncC92Visibility();
+    if (($("c92Wrap").style.display !== "none") && !$("cTipoConnSel").value) {
+      return setError("c4Error","Responda C.9.2.");
+    }
+
+    showScreen("screenC_5");
+  });
+
+  // C5 nav
+  $("btnC5_Ant").addEventListener("click", () => showScreen("screenC_4"));
 
   /***********************
    * Dynamic "Otro" inputs
@@ -1827,6 +3106,86 @@
   toggleOtro("tipovivSel","tipovivOtro");
   toggleOtro("matpisosSel","matpisosOtro");
   toggleOtro("tipoaguaSel","tipoaguaOtro");
+
+  // “Otro” en selects
+  toggleOtro("cSithogSel","cSithogOtro");
+  toggleOtro("cCocinaSel","cCocinaOtro");
+
+  // Uppercase inputs
+  toUpperOnlyLetters($("cRespondente"));
+  toUpperOnlyLetters($("cSithogOtro"));
+  toUpperOnlyLetters($("cCocinaOtro"));
+  toUpperOnlyLetters($("cJefeHog"));
+
+  // BotonSi/No Bloque C
+  [
+    "btnC_excltr",
+    "btnC_tienecoc",
+    "btnC_lavadero",
+    "btnC_garage",
+    "btnC_usodor",
+    "btnC_excltrestcons",
+    "btnC_connint"
+  ].forEach(initBotonSiNo);
+
+
+
+  function bindAutoZero(siNoBtnId, targetInputId){
+    const btn = $(siNoBtnId);
+    const inp = $(targetInputId);
+
+    function syncState(){
+      const v = (btn.textContent || "").trim().toUpperCase();
+
+      if (v === "NO") {
+        inp.value = "0";
+        inp.disabled = true;
+        inp.classList.add("input-disabled");
+      } 
+      else if (v === "SI") {
+        inp.value = "";
+        inp.disabled = false;
+        inp.classList.remove("input-disabled");
+        inp.focus();
+      } 
+      else {
+        inp.value = "";
+        inp.disabled = true;
+        inp.classList.add("input-disabled");
+      }
+    }
+
+    // Cada vez que cambia el botón
+    btn.addEventListener("click", syncState);
+
+    // Ejecutar al iniciar por si ya tenía estado
+    syncState();
+  }
+
+  // Aplicamos a C.5 y C.6
+  bindAutoZero("btnC_usodor", "cCantUsodor");
+  bindAutoZero("btnC_excltrestcons", "cCantExcltrEstCons");
+
+
+
+
+  function syncC92Visibility(){
+    const v = ($("btnC_connint").textContent || "").trim();
+    if (v === "NO") {
+      $("c92Wrap").style.display = "none";
+      $("cTipoConnSel").value = ""; // payload tipoconn vacío
+    } else {
+      $("c92Wrap").style.display = "";
+    }
+  }
+
+  // cada click del boton Si/No actualiza
+  $("btnC_connint").addEventListener("click", syncC92Visibility);
+
+  // al entrar a pantalla C4, también
+  function onEnterC4(){
+    syncC92Visibility();
+  }
 
   /***********************
    * Uppercase inputs
@@ -1850,7 +3209,9 @@
     "btnVillaEmerg",
     "btnCompartenGastos",
     "btnServDom",
-    "btnPensionistas"
+    "btnPensionistas",
+    "revinttechSel",
+    "banioSel"    
   ].forEach(initBotonSiNo);
 
 
@@ -1869,15 +3230,832 @@
     }
   });
 
+
+
+  async function fetchNextComponenteNro(){
+    //const url = `${scriptUrl}?action=nextComponent&idbloqayb=${encodeURIComponent(state.idBloqAyB || "")}&ident=${encodeURIComponent(state.hdr.identviv || "")}`;
+
+    const url = `${scriptUrl}?action=nextComponent&idbloqayb=${encodeURIComponent(state.idBloqAyB || "")}&ident=${encodeURIComponent(parseInt(state.hdr.identviv || "0", 10))}`;
+    
+    
+    console.log(url);
+
+    const resp = await fetch(url, { cache:"no-cache" });
+    const data = await resp.json();
+    if(!data?.ok) throw new Error(data?.msg || "No se pudo calcular componente");
+    return Number(data.next) || 1;
+  }
+
+
+
+  // async function fetchNextComponenteNro(){
+  //   const idb = String(state.idBloqAyB || "").trim();
+  ////   const ident = String(state.hdr.identviv || "").trim();
+  //    const ident = Number(state.hdr.identviv || 0);
+  //    const ident = Number(state.hdr.identviv || 0);
+
+  //   // cache-busting: hace la URL única SIEMPRE
+  //   const ts = Date.now();
+
+  //   const url =
+  //     `${scriptUrl}?action=nextComponent` +
+  //     `&idbloqayb=${encodeURIComponent(idb)}` +
+  //     `&ident=${encodeURIComponent(ident)}` +
+  //     `&ts=${ts}`;
+
+  //   console.log("GET nextComponent:", { url, idbloqayb: idb, ident });
+
+  //   const resp = await fetch(url, { cache: "no-store" });
+  //   const data = await resp.json();
+
+  //   console.log("RESP nextComponent:", data);
+
+  //   if(!data?.ok) throw new Error(data?.msg || "No se pudo calcular componente");
+  //   return Number(data.next) || 1;
+  // }
+
+
+  async function fetchBloqueAyBGuardadoByIdent(){
+    const identviv = parseInt($("identAyBBuscarInput").value || "0", 10);
+
+    if(!identviv){
+      throw new Error("Ingrese una identificación única de vivienda válida.");
+    }
+
+    const url =
+      `${scriptUrl}?action=buscarBloqueAyB` +
+      `&identviv=${encodeURIComponent(identviv)}`;
+
+    const resp = await fetch(url, { cache:"no-store" });
+    const data = await resp.json();
+
+    if(!data?.ok){
+      throw new Error(data?.msg || "No se pudo buscar Bloque AyB.");
+    }
+
+    return Array.isArray(data.rows) ? data.rows : [];
+  }
+
+
+  let aybSearchRows = [];
+  let aybSelectedRow = null;
+
+  function renderAyBSearchResults(rows){
+    aybSearchRows = rows || [];
+    aybSelectedRow = null;
+
+    $("aybSearchBody").innerHTML = "";
+    $("aybRecoveredInfo").innerHTML = "";
+
+    if(!aybSearchRows.length){
+      $("aybSearchWrap").style.display = "none";
+      setError("aybSearchError", "No se encontraron registros de Bloque AyB para esa identificación.");
+      return;
+    }
+
+    setError("aybSearchError", "");
+    $("aybSearchWrap").style.display = "block";
+
+    aybSearchRows.forEach((r, idx) => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${r.id ?? ""}</td>
+        <td>${r.identviv ?? ""}</td>
+        <td>${r.calle ?? ""}</td>
+        <td>${r.nro ?? ""}</td>
+      `;
+
+
+      // tr.addEventListener("click", () => {
+      //   [...$("aybSearchBody").querySelectorAll("tr")].forEach(x => x.classList.remove("selected"));
+      //   tr.classList.add("selected");
+      //   aybSelectedRow = r;
+      //   applyRecoveredAyBToState(r);
+      //   renderRecoveredAyBInfo(r);
+      // });
+
+
+      tr.addEventListener("click", () => {
+        [...$("aybSearchBody").querySelectorAll("tr")].forEach(x => x.classList.remove("selected"));
+        tr.classList.add("selected");
+
+        aybSelectedRow = r;
+
+        clearHdrSelectionUI(); // por si había quedado algo de hoja de ruta
+
+        applyRecoveredAyBToState(r);
+        renderRecoveredAyBInfo(r);
+        showBlockButtonsForMode("aybRecovered");
+      });
+
+
+      $("aybSearchBody").appendChild(tr);
+    });
+  }
+
+  function renderRecoveredAyBInfo(r){
+    const items = [
+      ["ID BloqueAyB", r.id],
+      ["Identificación única de vivienda (A.1)", r.identviv],
+      ["Participación", r.participacion],
+      ["Fracción", r.fraccion],
+      ["Radio", r.radio],
+      ["Manzana", r.manzana],
+      ["Lado", r.lado],
+      ["Calle", r.calle],
+      ["Nº", r.nro],
+      ["Piso", r.piso],
+      ["Departamento o Casa", r.dptocasa],
+      ["Año", r.anio],
+      ["Trimestre", r.trimestre],
+      ["Semana de referencia", r.semref],
+      ["Inicio de Encuesta - Visita", r.inicioenc],
+      ["Respondente", r.respondente]
+    ];
+
+    $("aybRecoveredInfo").innerHTML = "";
+
+    items.forEach((pair, idx) => {
+      const div = document.createElement("div");
+      div.className = "hrItem " + (idx % 2 === 0 ? "blue1" : "blue2");
+      div.textContent = `${pair[0]}: ${pair[1] ?? ""}`;
+      $("aybRecoveredInfo").appendChild(div);
+    });
+  }
+
+
+  // function applyRecoveredAyBToState(r){
+  //   state.hdr = {
+  //     ...(state.hdr || {}),
+  //     idhdr: `AYB-${r.id}`,   // valor sintético para habilitar botones
+  //     identviv: String(r.identviv || "").trim(),
+  //     participacion: String(r.participacion || "").trim(),
+  //     fraccion: String(r.fraccion || "").trim(),
+  //     radio: String(r.radio || "").trim(),
+  //     manzana: String(r.manzana || "").trim(),
+  //     lado: String(r.lado || "").trim(),
+  //     trimestre: String(r.trimestre || "").trim(),
+  //     semref: String(r.semref || "").trim()
+  //   };
+
+  //   state.idBloqAyB = String(r.id || "").trim();
+  //   state.calleAyB = String(r.calle || "").trim();
+  //   state.nroAyB   = String(r.nro || "").trim();
+  //   state.pisoAyB  = String(r.piso || "").trim();
+
+  //   // opcional: dejar precargadas también las vistas de AyB
+  //   if($("identvivShow")) $("identvivShow").value = state.hdr.identviv;
+  //   if($("participacionShow")) $("participacionShow").value = state.hdr.participacion;
+  //   if($("fraccionShow")) $("fraccionShow").value = state.hdr.fraccion;
+  //   if($("radioShow")) $("radioShow").value = state.hdr.radio;
+  //   if($("manzanaShow")) $("manzanaShow").value = state.hdr.manzana;
+  //   if($("ladoShow")) $("ladoShow").value = state.hdr.lado;
+  //   if($("anioShow")) $("anioShow").value = String(r.anio || "");
+  //   if($("trimestreShow")) $("trimestreShow").value = state.hdr.trimestre;
+  //   if($("semrefShow")) $("semrefShow").value = state.hdr.semref;
+  // }
+
+
+  function applyRecoveredAyBToState(r){
+    state.hdr = {
+      ...(state.hdr || {}),
+      idhdr: `REC-${r.id}`, // sintético, solo para referencia interna
+      identviv: String(r.identviv || "").trim(),
+      participacion: String(r.participacion || "").trim(),
+      fraccion: String(r.fraccion || "").trim(),
+      radio: String(r.radio || "").trim(),
+      manzana: String(r.manzana || "").trim(),
+      lado: String(r.lado || "").trim(),
+      trimestre: String(r.trimestre || "").trim(),
+      semref: String(r.semref || "").trim()
+    };
+
+    state.idBloqAyB = String(r.id || "").trim();
+    state.calleAyB  = String(r.calle || "").trim();
+    state.nroAyB    = String(r.nro || "").trim();
+    state.pisoAyB   = String(r.piso || "").trim();
+  }
+
+
+  $("identAyBBuscarInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      $("btnBuscarAyBGuardado").click();
+    }
+  });
+
+
+
+  // $("btnBuscarAyBGuardado").addEventListener("click", async () => {
+  //   setError("aybSearchError", "");
+  //   $("aybRecoveredInfo").innerHTML = "";
+  //   $("aybSearchBody").innerHTML = "";
+  //   $("aybSearchWrap").style.display = "none";
+
+  //   try{
+  //     showOverlay("Buscando Bloque AyB", "Consultando registros guardados...");
+  //     const rows = await fetchBloqueAyBGuardadoByIdent();
+  //     renderAyBSearchResults(rows);
+  //   }catch(err){
+  //     console.log(err);
+  //     setError("aybSearchError", err.message || "No se pudo buscar el registro.");
+  //   }finally{
+  //     hideOverlay();
+  //   }
+  // });
+
+
+  $("btnBuscarAyBGuardado").addEventListener("click", async () => {
+    clearHdrSelectionUI();
+    clearRecoveredAyBUI();
+
+    try{
+      showOverlay("Buscando Bloque AyB", "Consultando registros guardados.");
+      const rows = await fetchBloqueAyBGuardadoByIdent();
+      renderAyBSearchResults(rows);
+    }catch(err){
+      console.log(err);
+      setError("aybSearchError", err.message || "No se pudo buscar el registro.");
+    }finally{
+      hideOverlay();
+    }
+  });
+
+
+  function renderDTopInfo(){
+    const h = state.hdr;
+
+    const items = [
+      ["Identificación única de vivienda (A.1)", h.identviv], // payload ident
+      ["Fracción", h.fraccion],
+      ["Radio", h.radio],
+      ["Manzana", h.manzana],
+      ["Lado", h.lado],
+      ["Calle", state.calleAyB || ""],
+      ["Nº", state.nroAyB || ""],
+      ["Piso", state.pisoAyB || ""],
+      ["ID BloqueAyB", state.idBloqAyB || ""],
+    ];
+
+    $("dTopInfo").innerHTML = "";
+    items.forEach((pair, idx) => {
+      const div = document.createElement("div");
+      div.className = "hrItem " + (idx % 2 === 0 ? "orange1" : "orange2");
+      div.textContent = `${pair[0]}: ${pair[1] ?? ""}`;
+      $("dTopInfo").appendChild(div);
+    });
+
+    $("dIdentShow").textContent = h.identviv || "—";
+  }
+
+
+  // Botones Si/No de Bloque D
+  [
+    "btnD_entrealiz",
+    "btnD_tieneospami",
+    "btnD_tienemutprepservem",
+    "btnD_tieneplaseg",
+    "btnD_consprofsal",
+    "btnD_perjub"
+  ].forEach(initBotonSiNo);
+
+  // Upper inputs
+  toUpperOnlyLetters($("dRespondente"));
+  toUpperOnlyLetters($("dComponenteNom"));
+  toUpperOnlyLetters($("dLugnacTxt"));
+  toUpperOnlyLetters($("dPaisnacOtro"));
+  toUpperOnlyLetters($("dLugviviaTxt"));
+  toUpperOnlyLetters($("dPaisviviaOtro"));
+
+  // Mostrar/ocultar “especificar” en lugar nacimiento y vivía 5 años
+  function toggleEspecificar(selId, inputId, valuesThatNeedText){
+    const sel = $(selId), inp=$(inputId);
+    function sync(){
+      const v = String(sel.value||"");
+      inp.style.display = valuesThatNeedText.includes(v) ? "" : "none";
+      if(inp.style.display==="none") inp.value="";
+    }
+    sel.addEventListener("change", sync);
+    sync();
+  }
+
+  toggleEspecificar("dDondeNacioSel","dLugnacTxt",[
+    "En otra provincia (especificar)",
+    "En un país limítrofe (especificar)",
+    "En otro pais (especificar)"
+  ]);
+
+  toggleEspecificar("dDondeViviaSel","dLugviviaTxt",[
+    "En otra provincia ( especificar)",
+    "En un país limítrofe (especificar)",
+    "En otro pais (especificar)"
+  ]);
+
+  // País “Otro”
+  toggleOtro("dPaisnacSel","dPaisnacOtro");
+  toggleOtro("dPaisviviaSel","dPaisviviaOtro");
+
+  // Jubilación: NO => 0 y disabled (mismo patrón que bloque C)
+  function bindAutoZeroDisable(siNoBtnId, targetInputId){
+    const btn = $(siNoBtnId);
+    const inp = $(targetInputId);
+
+    function sync(){
+      const v = (btn.textContent||"").trim().toUpperCase();
+      if(v==="NO"){
+        inp.value="0"; inp.disabled=true; inp.classList.add("input-disabled");
+      }else if(v==="SI"){
+        inp.value=""; inp.disabled=false; inp.classList.remove("input-disabled");
+        inp.focus();
+      }else{
+        inp.value=""; inp.disabled=true; inp.classList.add("input-disabled");
+      }
+    }
+    btn.addEventListener("click", sync);
+    sync();
+  }
+
+  bindAutoZeroDisable("btnD_perjub","dImpJub");
+
+  function calcEdad(yyyy_mm_dd){
+    if(!yyyy_mm_dd) return "";
+    const [y,m,d] = yyyy_mm_dd.split("-").map(n=>parseInt(n,10));
+    if(!y || !m || !d) return "";
+    const today = new Date();
+    let age = today.getFullYear() - y;
+    const mm = (today.getMonth()+1) - m;
+    if(mm < 0 || (mm===0 && today.getDate() < d)) age--;
+    return String(Math.max(0, age));
+  }
+
+  $("dFecNac").addEventListener("change", () => {
+    const edad = calcEdad($("dFecNac").value);
+    $("dEdadShow").textContent = edad ? `${edad} años` : "—";
+  });
+
+
+  // $("btnBloqueD").addEventListener("click", async () => {
+    
+  //   await refreshClientInfo();
+
+  //   setError("d1Error","");
+
+  //   renderDTopInfo();
+  //   $("dIdentShow").textContent = state.hdr.identviv || "—";
+
+  //   showOverlay("Cargando Bloque D", "Calculando Componente N°...");
+  //   try{
+  //     const next = await fetchNextComponenteNro();
+  //     $("dComponenteNroShow").textContent = String(next);
+  //     hideOverlay();
+  //     showScreen("screenD_1");
+  //   }catch(err){
+  //     console.log(err);
+  //     hideOverlay();
+  //     setError("d1Error","No se pudo calcular Componente N°. Revise conexión o script.");
+  //     showScreen("screenD_1");
+  //   }
+  // });
+
+
+  $("btnBloqueD").addEventListener("click", async () => {
+    setError("hdrError", "");
+    setError("aybSearchError", "");
+    setError("d1Error", "");
+
+    if(!hasRegistroBaseCargado()){
+      setError("hdrError","Primero busque un registro de Hoja de Ruta o recupere uno guardado en Bloque AyB.");
+      return;
+    }
+
+    await refreshClientInfo();
+
+    showOverlay("Bloque D", "Calculando próximo Componente N°...");
+
+    try{
+      const next = await fetchNextComponenteNro();
+
+      if($("dComponenteNroShow")){
+        $("dComponenteNroShow").textContent = String(next);
+      }
+
+      resetBloqueDForm();
+      renderDTopInfo();
+      hideOverlay();
+      showScreen("screenD_1");
+
+    }catch(err){
+      console.log(err);
+      hideOverlay();
+      setError("hdrError", err.message || "No se pudo calcular Componente N°.");
+    }
+  });
+
+
+
+  $("btnD1_HdR").addEventListener("click", () => showScreen("screenHdR"));
+
+
+  $("btnD1_Sig").addEventListener("click", () => {
+    setError("d1Error","");
+    if(!$("dHogarNro").value.trim()) return setError("d1Error","Ingrese Hogar N°.");
+    if(!$("dRespondente").value.trim()) return setError("d1Error","Ingrese Respondente.");
+    if(!$("dComponenteNom").value.trim()) return setError("d1Error","Ingrese Nombre del componente.");
+    if(!($("btnD_entrealiz").textContent||"").trim()) return setError("d1Error","Responda Entrevista realizada (SI/NO).");
+    showScreen("screenD_2");
+  });
+
+  $("btnD2_Ant").addEventListener("click", () => showScreen("screenD_1"));
+  $("btnD2_Sig").addEventListener("click", () => {
+    setError("d2Error","");
+    if(!$("dRelparSel").value) return setError("d2Error","Responda Relación de parentesco.");
+    if(!$("dSexoSel").value) return setError("d2Error","Responda Sexo.");
+    if(!$("dFecNac").value) return setError("d2Error","Responda Fecha de nacimiento.");
+    if(!$("dEstCivSel").value) return setError("d2Error","Responda Estado civil.");
+    if(!($("btnD_tieneospami").textContent||"").trim()) return setError("d2Error","Responda Obra social/PAMI (SI/NO).");
+    if(!($("btnD_tienemutprepservem").textContent||"").trim()) return setError("d2Error","Responda Mutual/Prepaga/Servicio (SI/NO).");
+    if(!($("btnD_tieneplaseg").textContent||"").trim()) return setError("d2Error","Responda Planes/Seguros públicos (SI/NO).");
+    if(!$("dDifperSel").value) return setError("d2Error","Responda Dificultad permanente.");
+    if(!$("dEncbarrSel").value) return setError("d2Error","Responda Barreras.");
+    showScreen("screenD_3");
+  });
+
+  $("btnD3_Ant").addEventListener("click", () => showScreen("screenD_2"));
+  $("btnD3_Sig").addEventListener("click", () => {
+    setError("d3Error","");
+    if(!($("btnD_consprofsal").textContent||"").trim()) return setError("d3Error","Responda 8.1 (SI/NO).");
+    if(!$("dMotultconsSel").value) return setError("d3Error","Responda 8.2.");
+    if(!$("dMedultconsSel").value) return setError("d3Error","Responda 8.3.");
+    if(!$("dEstultconsSel").value) return setError("d3Error","Responda 8.4.");
+    showScreen("screenD_4");
+  });
+
+  $("btnD4_Ant").addEventListener("click", () => showScreen("screenD_3"));
+  $("btnD4_Sig").addEventListener("click", () => {
+    setError("d4Error","");
+    if(!$("dSableescrSel").value) return setError("d4Error","Responda 9.");
+    if(!$("dAsistesteducSel").value) return setError("d4Error","Responda 10.");
+    if(!$("dTipoestSel").value) return setError("d4Error","Responda 11.");
+    if(!$("dNivmasalSel").value) return setError("d4Error","Responda 12.");
+    //if(!$("dTipjarSel").value) return setError("d4Error","Responda 12.1.");
+    if(!$("dFinjarSel").value) return setError("d4Error","Responda 13.");
+    if(!$("dUltanapSel").value) return setError("d4Error","Responda 14.");
+    if(($("dNivmasalSel").value||"") === "Inicial(Jardin..preescolar)" && !($("dTipjarSel").value||"")){
+      return setError("d4Error","Falta responder 12.1 (Tipo de Jardín/Preescolar).");
+    }
+    showScreen("screenD_5");
+  });
+
+  $("btnD5_Ant").addEventListener("click", () => showScreen("screenD_4"));
+  $("btnD5_Sig").addEventListener("click", () => {
+    setError("d5Error","");
+
+    if(!$("dDondeNacioSel").value) return setError("d5Error","Responda 15.");
+    if($("dLugnacTxt").style.display!=="none" && !$("dLugnacTxt").value.trim()) return setError("d5Error","Especifique lugar de nacimiento (15).");
+
+    if(!$("dProvnacSel").value) return setError("d5Error","Responda 15.1.");
+    if(!$("dPaisnacSel").value) return setError("d5Error","Responda 15.2.");
+    if($("dPaisnacSel").value==="Otro" && !$("dPaisnacOtro").value.trim()) return setError("d5Error","Especifique país (15.2 Otro).");
+
+    if(!$("dDondeViviaSel").value) return setError("d5Error","Responda 16.");
+    if($("dLugviviaTxt").style.display!=="none" && !$("dLugviviaTxt").value.trim()) return setError("d5Error","Especifique lugar (16).");
+
+    if(!$("dProvviviaSel").value) return setError("d5Error","Responda 16.1.");
+    if(!$("dPaisviviaSel").value) return setError("d5Error","Responda 16.2.");
+    if($("dPaisviviaSel").value==="Otro" && !$("dPaisviviaOtro").value.trim()) return setError("d5Error","Especifique país (16.2 Otro).");
+
+    showScreen("screenD_6");
+  });
+
+  $("btnD6_Ant").addEventListener("click", () => showScreen("screenD_5"));
+
+
+  function toggleTipjar(){
+    const niv = ($("dNivmasalSel").value || "").trim();
+    const wrap = $("dTipjarWrap");
+    const sel  = $("dTipjarSel");
+
+    const isInicial = (niv === "Inicial(Jardin..preescolar)");
+
+    wrap.style.display = isInicial ? "block" : "none";
+    if(!isInicial){
+      sel.value = ""; // si no corresponde, lo limpio
+    }
+  }
+
+  // listener
+  $("dNivmasalSel").addEventListener("change", toggleTipjar);
+
+  // llamalo también al entrar a esa pantalla si querés:
+  toggleTipjar();
+
+
+  function autoProvPais(localidadSelId, provSelId, paisSelId){
+    const loc = ($(localidadSelId).value || "").trim();
+    const prov = $(provSelId);
+    const pais = $(paisSelId);
+
+    if(loc === "En esta localidad" || loc === "En otra localidad de esta provincia"){
+      prov.value = "Córdoba";
+      pais.value = "Argentina";
+    } else {
+      prov.value = "";
+      pais.value = "";
+    }
+  }
+
+  $("dDondeNacioSel").addEventListener("change", () => {
+    autoProvPais("dDondeNacioSel","dProvnacSel","dPaisnacSel");
+  });
+
+  $("dDondeViviaSel").addEventListener("change", () => {
+    autoProvPais("dDondeViviaSel","dProvviviaSel","dPaisviviaSel");
+  });
+
+  // opcional: al entrar a esa pantalla, por si ya había algo seteado
+  autoProvPais("dDondeNacioSel","dProvnacSel","dPaisnacSel");
+  autoProvPais("dDondeViviaSel","dProvviviaSel","dPaisviviaSel");
+
+
+  function resetBloqueDForm(){
+    // Grupo 1
+    $("dHogarNro").value = "";
+    $("dRespondente").value = "";
+    $("dComponenteNom").value = "";
+    resetSiNoBtn("btnD_entrealiz");
+
+    // Grupo 2
+    $("dRelparSel").value = "";
+    $("dSexoSel").value = "";
+    $("dFecNac").value = "";
+    $("dEdadShow").textContent = "—";
+    $("dEstCivSel").value = "";
+    resetSiNoBtn("btnD_tieneospami");
+    resetSiNoBtn("btnD_tienemutprepservem");
+    resetSiNoBtn("btnD_tieneplaseg");
+    $("dDifperSel").value = "";
+    $("dEncbarrSel").value = "";
+
+    // Grupo 3
+    resetSiNoBtn("btnD_consprofsal");
+    $("dMotultconsSel").value = "";
+    $("dMedultconsSel").value = "";
+    $("dEstultconsSel").value = "";
+
+    // Grupo 4
+    $("dSableescrSel").value = "";
+    $("dAsistesteducSel").value = "";
+    $("dTipoestSel").value = "";
+    $("dNivmasalSel").value = "";
+    $("dTipjarSel").value = "";
+    $("dFinjarSel").value = "";
+    $("dUltanapSel").value = "";
+    toggleTipjar(); // oculta 12.1 si no es inicial
+
+    // Grupo 5
+    $("dDondeNacioSel").value = "";
+    $("dProvnacSel").value = "";
+    $("dPaisnacSel").value = "";
+    $("dLugnacTxt").value = "";
+    $("dDondeViviaSel").value = "";
+    $("dProvviviaSel").value = "";
+    $("dPaisviviaSel").value = "";
+    $("dLugviviaTxt").value = "";
+
+    // Grupo 6
+    resetSiNoBtn("btnD_perjub");
+    $("dImpJub").value = "";
+
+    // errores
+    ["d1Error","d2Error","d3Error","d4Error","d5Error","d6Error"].forEach(id => setError(id,""));
+  }
+
+  // helper: reset del BotonSi/No (gris vacío)
+  function resetSiNoBtn(btnId){
+    const b = $(btnId);
+    b.textContent = "";
+    b.style.background = "#999999";
+    b.style.color = "#fff";
+  }
+
+
+  async function postBloqueD(){
+    if(navigator.geolocation){
+      try{
+        const p = await new Promise((resolve, reject) =>
+          navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy:true, timeout:8000, maximumAge:0 })
+        );
+        state.latoper = p.coords.latitude;
+        state.lonoper = p.coords.longitude;
+      }catch(e){}
+    }
+
+    // const payload = {
+    //   nomBloque: "BloqueD",
+
+    //   // Liga + memoria (como venimos)
+    //   idbloqayb: String(state.idBloqAyB || ""),
+    //   ident: String(state.hdr.identviv || ""),
+    //   fraccionbloqayb: String(state.hdr.fraccion || ""),
+    //   radiobloqayb: String(state.hdr.radio || ""),
+    //   manzanabloqayb: String(state.hdr.manzana || ""),
+    //   ladobloqayb: String(state.hdr.lado || ""),
+    //   callebloqayb: upperTxt(state.calleAyB || ""),
+    //   nrobloqayb: String(state.nroAyB || ""),
+    //   pisobloqayb: upperTxt(state.pisoAyB || ""),
+
+    //   // D1
+    //   hogarnrobloqd: String($("dHogarNro").value.trim()),
+    //   respondentebloqd: upperTxt($("dRespondente").value),
+    //   componentenro: String($("dComponenteNroShow").textContent.trim()),
+    //   componentenom: upperTxt($("dComponenteNom").value),
+    //   entrealiz: ($("btnD_entrealiz").textContent||"").trim(),
+
+    //   // D2
+    //   relpar: String($("dRelparSel").value||""),
+    //   sexo: String($("dSexoSel").value||""),
+    //   fecnac: String($("dFecNac").value||""),
+    //   edad: calcEdad($("dFecNac").value),
+    //   estciv: String($("dEstCivSel").value||""),
+    //   tieneospami: ($("btnD_tieneospami").textContent||"").trim(),
+    //   tienemutprepservem: ($("btnD_tienemutprepservem").textContent||"").trim(),
+    //   tieneplaseg: ($("btnD_tieneplaseg").textContent||"").trim(),
+    //   difper: String($("dDifperSel").value||""),
+    //   encbarr: String($("dEncbarrSel").value||""),
+
+    //   // D3
+    //   consprofsal: ($("btnD_consprofsal").textContent||"").trim(),
+    //   motultcons: String($("dMotultconsSel").value||""),
+    //   medultcons: String($("dMedultconsSel").value||""),
+    //   estultcons: String($("dEstultconsSel").value||""),
+
+    //   // D4
+    //   sableescr: String($("dSableescrSel").value||""),
+    //   asistesteduc: String($("dAsistesteducSel").value||""),
+    //   tipoest: String($("dTipoestSel").value||""),
+    //   nivmasal: String($("dNivmasalSel").value||""),
+    //   tipjar: String($("dTipjarSel").value||""),
+    //   finjar: String($("dFinjarSel").value||""),
+    //   ultanap: String($("dUltanapSel").value||""),
+
+    //   // D5
+    //   lugnac: upperTxt($("dLugnacTxt").style.display==="none" ? "" : $("dLugnacTxt").value),
+    //   provnac: String($("dProvnacSel").value||""),
+    //   paisnac: upperTxt(getOtroPayload("dPaisnacSel","dPaisnacOtro")),
+    //   lugvivia: upperTxt($("dLugviviaTxt").style.display==="none" ? "" : $("dLugviviaTxt").value),
+    //   provvivia: String($("dProvviviaSel").value||""),
+    //   paisvivia: upperTxt(getOtroPayload("dPaisviviaSel","dPaisviviaOtro")),
+
+    //   // D6
+    //   perjub: ($("btnD_perjub").textContent||"").trim(),
+    //   impjub: String($("dImpJub").value.trim()),
+
+    //   // Auditoría
+    //   fechahora: nowFechaHora(),
+    //   ip: state.ipAddress,
+    //   dispositivo: `DeviceID: ${state.deviceInfoGlobal["Fingerprint"]} | Browser: ${state.deviceInfoGlobal["Navegador"]}`,
+    //   latoper: fmtLatLonInt6(state.latoper),
+    //   lonoper: fmtLatLonInt6(state.lonoper),
+    // };
+
+    const payload = {
+      nomBloque: "BloqueD",
+
+      // Liga + memoria
+      idbloqayb: String(state.idBloqAyB || ""),                 // ID (no lo toco)
+      ident: String(state.hdr.identviv || ""),                  // suele ser num, lo dejo string
+      fraccionbloqayb: upperTxt(state.hdr.fraccion || ""),
+      radiobloqayb: upperTxt(state.hdr.radio || ""),
+      manzanabloqayb: upperTxt(state.hdr.manzana || ""),
+      ladobloqayb: upperTxt(state.hdr.lado || ""),
+      callebloqayb: upperTxt(state.calleAyB || ""),
+      nrobloqayb: String(state.nroAyB || ""),                   // num como string
+      pisobloqayb: upperTxt(state.pisoAyB || ""),
+
+      // D1
+      hogarnrobloqd: String($("dHogarNro").value.trim()),       // num como string
+      respondentebloqd: upperTxt($("dRespondente").value),
+      componentenro: String($("dComponenteNroShow").textContent.trim()),
+      componentenom: upperTxt($("dComponenteNom").value),
+      entrealiz: upperTxt(($("btnD_entrealiz").textContent || "").trim()),
+
+      // D2
+      relpar: upperTxt($("dRelparSel").value || ""),
+      sexo: upperTxt($("dSexoSel").value || ""),
+      fecnac: String($("dFecNac").value || ""),                 // fecha (yyyy-mm-dd), no conviene upper
+      edad: calcEdad($("dFecNac").value),                       // num como string
+      estciv: upperTxt($("dEstCivSel").value || ""),
+      tieneospami: upperTxt(($("btnD_tieneospami").textContent || "").trim()),
+      tienemutprepservem: upperTxt(($("btnD_tienemutprepservem").textContent || "").trim()),
+      tieneplaseg: upperTxt(($("btnD_tieneplaseg").textContent || "").trim()),
+      difper: upperTxt($("dDifperSel").value || ""),
+      encbarr: upperTxt($("dEncbarrSel").value || ""),
+
+      // D3
+      consprofsal: upperTxt(($("btnD_consprofsal").textContent || "").trim()),
+      motultcons: upperTxt($("dMotultconsSel").value || ""),
+      medultcons: upperTxt($("dMedultconsSel").value || ""),
+      estultcons: upperTxt($("dEstultconsSel").value || ""),
+
+      // D4
+      sableescr: upperTxt($("dSableescrSel").value || ""),
+      asistesteduc: upperTxt($("dAsistesteducSel").value || ""),
+      tipoest: upperTxt($("dTipoestSel").value || ""),
+      nivmasal: upperTxt($("dNivmasalSel").value || ""),
+      tipjar: upperTxt($("dTipjarSel").value || ""),
+      finjar: upperTxt($("dFinjarSel").value || ""),
+      ultanap: upperTxt($("dUltanapSel").value || ""),
+
+      // D5
+      lugnac: upperTxt($("dLugnacTxt").style.display === "none" ? "" : $("dLugnacTxt").value),
+      provnac: upperTxt($("dProvnacSel").value || ""),
+      paisnac: upperTxt(getOtroPayload("dPaisnacSel", "dPaisnacOtro")),
+      lugvivia: upperTxt($("dLugviviaTxt").style.display === "none" ? "" : $("dLugviviaTxt").value),
+      provvivia: upperTxt($("dProvviviaSel").value || ""),
+      paisvivia: upperTxt(getOtroPayload("dPaisviviaSel", "dPaisviviaOtro")),
+
+      // D6
+      perjub: upperTxt(($("btnD_perjub").textContent || "").trim()),
+      impjub: String($("dImpJub").value.trim()),                // num
+
+      // Auditoría
+      fechahora: nowFechaHora(),                                // fecha-hora string, no hace falta upper
+      ip: state.ipAddress,                                      // IP
+      //dispositivo: upperTxt(`DeviceID: ${state.deviceInfoGlobal["Fingerprint"]} | Browser: ${state.deviceInfoGlobal["Navegador"]}`),
+      dispositivo: `DeviceID: ${state.deviceInfoGlobal["Fingerprint"]} | Browser: ${state.deviceInfoGlobal["Navegador"]}`
+    };
+
+    const resp = await fetch(scriptUrl, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify(payload)
+    });
+    return await resp.json();
+  }
+
+  $("btnRegistrarD").addEventListener("click", async () => {
+    setError("d6Error",""); setOk("d6Ok","");
+
+    if(!($("btnD_perjub").textContent||"").trim()) return setError("d6Error","Responda 17 (SI/NO).");
+    if(!$("dImpJub").value.trim()) return setError("d6Error","Responda 17.1 (importe).");
+
+    showOverlay("Registrando Bloque D","Enviando datos...");
+    try{
+      const res = await postBloqueD();
+      if(res?.success){
+        hideOverlay();
+        resetBloqueDForm();
+        await countdownRedirect({
+          seconds:5,
+          okElId:"d6Ok",
+          targetScreenId:"screenHdR",
+          prefix:"✅ Bloque D guardado.",
+          idText:`ID BloqueAyB: ${state.idBloqAyB || ""}`
+        });
+        return;
+      }
+      setError("d6Error","El servidor respondió sin success:true.");
+    }catch(err){
+      console.log(err);
+      setError("d6Error","Error registrando Bloque D.");
+    }finally{
+      hideOverlay();
+    }
+  });
+
+
+
+  tr.addEventListener("click", () => {
+    [...$("aybSearchBody").querySelectorAll("tr")].forEach(x => x.classList.remove("selected"));
+    tr.classList.add("selected");
+
+    aybSelectedRow = r;
+
+    setError("hdrError", "");
+    setError("aybSearchError", "");
+
+    applyRecoveredAyBToState(r);
+    renderRecoveredAyBInfo(r);
+  });
+
+
+
   /***********************
    * Startup
    ***********************/
   (async function init(){
-    await loadIp();
-    deviceInfoGlobal = await getClientProperties();
-    state.deviceInfoGlobal = deviceInfoGlobal;
+    // await loadIp();
+    // deviceInfoGlobal = await getClientProperties();
+    // console.log(deviceInfoGlobal);
+    // state.deviceInfoGlobal = deviceInfoGlobal;
+
+    await refreshClientInfo();
+
   })();
+
+
+  
 </script>
 </body>
-
 </html>
