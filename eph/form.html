@@ -314,6 +314,7 @@
     /* BotonSiNo */
     .siNoBtn{
       width: 120px;
+      height: 42px;            /* ← agregá esto */
       border:none;
       border-radius: 14px;
       padding: 10px 12px;
@@ -323,6 +324,10 @@
       color: #fff;
       background: var(--neutral);
       box-shadow: var(--shadow2);
+      
+      display: inline-flex;    /* ← agregá esto */
+      align-items: center;     /* ← agregá esto */
+      justify-content: center; /* ← agregá esto */
     }
     .siNoBtn.state-si{ background: var(--ok); }
     .siNoBtn.state-no{ background: var(--danger); }
@@ -1858,28 +1863,71 @@
   /***********************
    * BotonSi/No
    ***********************/
+  // function initBotonSiNo(btnId){
+  //   const btn = $(btnId);
+  //   // estado inicial vacío y gris
+  //   btn.textContent = "";
+  //   btn.classList.remove("state-si","state-no");
+
+  //   btn.addEventListener("click", () => {
+  //     const t = (btn.textContent || "").trim();
+  //     if(t === ""){
+  //       btn.textContent = "SI";
+  //       btn.classList.add("state-si");
+  //       btn.classList.remove("state-no");
+  //     } else if(t === "SI"){
+  //       btn.textContent = "NO";
+  //       btn.classList.add("state-no");
+  //       btn.classList.remove("state-si");
+  //     } else {
+  //       btn.textContent = "";
+  //       btn.classList.remove("state-si","state-no");
+  //     }
+  //   });
+  // }
+
+
   function initBotonSiNo(btnId){
     const btn = $(btnId);
-    // estado inicial vacío y gris
-    btn.textContent = "";
-    btn.classList.remove("state-si","state-no");
+    if(!btn) return;
+
+    function paintState(state){
+      btn.classList.remove("state-si","state-no");
+
+      if(state === "SI"){
+        btn.textContent = "SI";
+        btn.classList.add("state-si");
+        btn.style.background = "var(--ok)";
+        btn.style.color = "#fff";
+      } else if(state === "NO"){
+        btn.textContent = "NO";
+        btn.classList.add("state-no");
+        btn.style.background = "var(--danger)";
+        btn.style.color = "#fff";
+      } else {
+        btn.textContent = "";
+        btn.style.background = "var(--neutral)";
+        btn.style.color = "#fff";
+      }
+    }
+
+    // estado inicial
+    paintState("");
 
     btn.addEventListener("click", () => {
       const t = (btn.textContent || "").trim();
+
       if(t === ""){
-        btn.textContent = "SI";
-        btn.classList.add("state-si");
-        btn.classList.remove("state-no");
+        paintState("SI");
       } else if(t === "SI"){
-        btn.textContent = "NO";
-        btn.classList.add("state-no");
-        btn.classList.remove("state-si");
+        paintState("NO");
       } else {
-        btn.textContent = "";
-        btn.classList.remove("state-si","state-no");
+        paintState("");
       }
     });
   }
+
+
 
   function botonSiNoValue(btnId){
     const t = ($(btnId).textContent || "").trim();
