@@ -1,0 +1,420 @@
+<!-- 12032026_1034 -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script src="https://cdn.jsdelivr.net/npm/canvg@4.0.3/lib/umd.min.js"></script>
+  <title>Flowchart Mermaid con descarga PNG</title>
+  <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/modernizacionmjm/web/refs/heads/main/Logos/favicon.ico">
+
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: "default",
+    securityLevel: "loose",
+    flowchart: {
+      htmlLabels: false,
+      useMaxWidth: false,
+      curve: "basis"
+    }
+  });
+
+  let svgGenerado = "";
+
+  function obtenerNombreArchivo() {
+    const ahora = new Date();
+
+    const dd = String(ahora.getDate()).padStart(2, "0");
+    const mm = String(ahora.getMonth() + 1).padStart(2, "0");
+    const yyyy = String(ahora.getFullYear());
+
+    const HH = String(ahora.getHours()).padStart(2, "0");
+    const MM = String(ahora.getMinutes()).padStart(2, "0");
+
+    return `flowchart_${dd}${mm}${yyyy}_${HH}${MM}.png`;
+  }
+
+  function aplicarEstilosAlSvg(svgElement) {
+    if (!svgElement) return;
+
+    svgElement.style.maxWidth = "none";
+    svgElement.style.height = "auto";
+    svgElement.style.display = "block";
+    svgElement.style.background = "#ffffff";
+    svgElement.style.borderRadius = "18px";
+    svgElement.style.boxShadow = "0 10px 30px rgba(0,0,0,.10)";
+    svgElement.style.padding = "16px";
+
+    const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+    style.textContent = `
+      .node rect,
+      .node polygon {
+        rx: 12;
+        ry: 12;
+      }
+
+      .label text,
+      .nodeLabel,
+      .edgeLabel {
+        font-family: Arial, Helvetica, sans-serif !important;
+      }
+
+      .edgePath path {
+        stroke-width: 2.2px !important;
+      }
+    `;
+    svgElement.prepend(style);
+  }
+
+  async function renderizarDiagrama() {
+    const container = document.getElementById("diagramContainer");
+    const input = document.getElementById("mermaidInput");
+    const codigoMermaid = input.value.trim();
+
+    if (!codigoMermaid) {
+      container.innerHTML = `
+        <div class="emptyState">
+          Pegá un código Mermaid y tocá <b>Generar flowchart</b>.
+        </div>
+      `;
+      svgGenerado = "";
+      return;
+    }
+
+    try {
+      const renderId = "miDiagramaMermaid_" + Date.now();
+      const { svg } = await mermaid.render(renderId, codigoMermaid);
+      svgGenerado = svg;
+      container.innerHTML = svg;
+
+      const svgEl = container.querySelector("svg");
+      aplicarEstilosAlSvg(svgEl);
+    } catch (error) {
+      console.error("Error renderizando Mermaid:", error);
+      svgGenerado = "";
+      container.innerHTML = `
+        <div class="errorBox">
+          Error al renderizar el diagrama.<br><br>
+          Revisá la sintaxis del código Mermaid.
+        </div>
+      `;
+    }
+  }
+
+  function descargarSVGComoPNG(svgText, nombreArchivo) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgText, "image/svg+xml");
+    const svgEl = doc.documentElement;
+
+    if (!svgEl.getAttribute("xmlns")) {
+      svgEl.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    }
+    if (!svgEl.getAttribute("xmlns:xlink")) {
+      svgEl.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+    }
+
+    let viewBox = svgEl.getAttribute("viewBox");
+    let width = 1600;
+    let height = 900;
+
+    if (viewBox) {
+      const parts = viewBox.split(/\s+|,/).map(Number);
+      if (parts.length === 4 && !parts.some(isNaN)) {
+        width = Math.ceil(parts[2]);
+        height = Math.ceil(parts[3]);
+      }
+    } else {
+      const w = parseFloat((svgEl.getAttribute("width") || "1600").replace("px", ""));
+      const h = parseFloat((svgEl.getAttribute("height") || "900").replace("px", ""));
+      width = Math.ceil(w || 1600);
+      height = Math.ceil(h || 900);
+      svgEl.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    }
+
+    svgEl.setAttribute("width", width);
+    svgEl.setAttribute("height", height);
+
+    const svgFinal = new XMLSerializer().serializeToString(svgEl);
+    const svgBase64 = btoa(unescape(encodeURIComponent(svgFinal)));
+    const dataUrl = `data:image/svg+xml;base64,${svgBase64}`;
+
+    const img = new Image();
+
+    img.onload = () => {
+      const escala = 2;
+      const margen = 24;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = (width + margen * 2) * escala;
+      canvas.height = (height + margen * 2) * escala;
+
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(escala, 0, 0, escala, 0, 0);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width + margen * 2, height + margen * 2);
+      ctx.drawImage(img, margen, margen, width, height);
+
+      const pngUrl = canvas.toDataURL("image/png");
+
+      const link = document.createElement("a");
+      link.href = pngUrl;
+      link.download = nombreArchivo;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    };
+
+    img.onerror = (e) => {
+      console.error("Error convirtiendo SVG a PNG:", e);
+      alert("No se pudo generar el PNG.");
+    };
+
+    img.src = dataUrl;
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    renderizarDiagrama();
+
+    document.getElementById("generateDiagram").addEventListener("click", async () => {
+      await renderizarDiagrama();
+    });
+
+    document.getElementById("downloadPngBtn").addEventListener("click", () => {
+      if (!svgGenerado) {
+        alert("Primero generá un flowchart válido.");
+        return;
+      }
+
+      const nombreArchivo = obtenerNombreArchivo();
+      descargarSVGComoPNG(svgGenerado, nombreArchivo);
+    });
+  });
+</script>
+
+  <style>
+    :root{
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --border: #dbe3ef;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+    }
+
+    *{ box-sizing: border-box; }
+
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #eef4ff 0%, #f7f9fc 100%);
+      color: var(--text);
+      padding: 24px;
+    }
+
+    .wrap{
+      max-width: 1700px;
+      margin: 0 auto;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:center;
+      margin-bottom:18px;
+    }
+
+    .titleBox h1{
+      margin:0 0 6px 0;
+      font-size: 28px;
+    }
+
+    .titleBox p{
+      margin:0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .titleBox{
+      text-align: center;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:none;
+      border-radius: 12px;
+      background: var(--primary);
+      color:#fff;
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor:pointer;
+      box-shadow: var(--shadow);
+      transition: .2s ease;
+    }
+
+    button:hover{
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      overflow:auto;
+    }
+
+
+
+    .mermaid{
+      background: #fff;
+    }
+
+    @media (max-width: 900px){
+      body{
+        padding: 14px;
+      }
+
+      .titleBox h1{
+        font-size: 22px;
+      }
+    }
+
+
+    .editorBox{
+      margin-bottom: 18px;
+    }
+
+
+
+    .editorLabel{
+      display:block;
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+
+
+
+    .card{
+      background: rgba(255,255,255,.88);
+      backdrop-filter: blur(8px);
+    }
+
+    .logoMuni{
+      height: 80px;
+      display:block;
+      margin: 0 auto 10px auto;
+    }
+
+
+#diagramContainer{
+  min-width: 1500px;
+  min-height: 500px;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding: 18px 10px 10px;
+  overflow:auto;
+}
+
+.emptyState{
+  width: 100%;
+  text-align: center;
+  color: #64748b;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+  border: 1px dashed #bfd3f5;
+  border-radius: 18px;
+  padding: 32px 18px;
+  font-size: 15px;
+}
+
+.errorBox{
+  width: 100%;
+  color:#b91c1c;
+  font-weight:bold;
+  padding:16px;
+  border:1px solid #fecaca;
+  border-radius:16px;
+  background:#fef2f2;
+}
+
+
+
+
+#mermaidInput{
+  width: 100%;
+  min-height: 460px;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 19px;
+  line-height: 1.6;
+  color: #111111;
+  background: #ffffff;
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.03);
+}
+
+#mermaidInput::placeholder{
+  color: #6b7280;
+}
+
+#mermaidInput:focus{
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+
+
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+<div class="topbar">
+
+
+  <div class="titleBox">
+
+    <img src="https://raw.githubusercontent.com/modernizacionmjm/web/refs/heads/main/Logos/LogoDef.png"
+        class="logoMuni">
+
+    <h1>Flowchart</h1>
+    <p>Pegá tu código Mermaid, generá el diagrama y descargalo en PNG</p>
+
+  </div>
+</div>
+
+
+
+    <div class="card">
+<div class="editorBox">
+  <label for="mermaidInput" class="editorLabel">Código Mermaid</label>
+  <textarea id="mermaidInput" spellcheck="false" placeholder="Pegá acá tu código Mermaid..."></textarea>
+
+  <div class="actions" style="margin-top:12px;">
+    <button id="generateDiagram">Generar flowchart</button>
+    <button id="downloadPngBtn">Descargar PNG</button>
+  </div>
+</div>
+
+      <div id="diagramContainer"></div>
+    </div>
+  </div>
+</body>
+</html>
