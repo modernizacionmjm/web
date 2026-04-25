@@ -377,12 +377,29 @@
     }
 
 
-    .tableWrap{
+    /* .tableWrap{
       width:100%;
       overflow:auto;
       border:1px solid rgba(255,255,255,.10);
       border-radius:14px;
       background: rgba(255,255,255,.04);
+    } */
+
+
+    .tableWrap{
+      width:100%;
+      max-width:100%;
+      overflow-x:auto;
+      overflow-y:hidden;
+      -webkit-overflow-scrolling:touch;
+      touch-action:pan-x pan-y;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .tableWrap table{
+      width:max-content;
     }
 
     .searchTable{
@@ -448,18 +465,37 @@
       font-weight:700;
     }
 
-    .bloqueE-tableWrap{
+    /* .bloqueE-tableWrap{
       overflow:auto;
+      border-radius:16px;
+      border:1px solid #e5e7eb;
+      background:#fff;
+      box-shadow:0 10px 30px rgba(0,0,0,.06);
+    } */
+
+    .bloqueE-tableWrap{
+      width:100%;
+      max-width:100%;
+      overflow-x:auto;
+      overflow-y:hidden;
+      -webkit-overflow-scrolling:touch;
+      touch-action:pan-x pan-y;
       border-radius:16px;
       border:1px solid #e5e7eb;
       background:#fff;
       box-shadow:0 10px 30px rgba(0,0,0,.06);
     }
 
-    .bloqueE-table{
+    /* .bloqueE-table{
       width:100%;
       border-collapse:collapse;
       min-width:760px;
+    } */
+
+    .bloqueE-table{
+      width:max-content;
+      min-width:760px;
+      border-collapse:collapse;
     }
 
     .bloqueE-table th,
@@ -3992,6 +4028,8 @@
     setError("hdrError", "");
     setError("aybSearchError", "");
 
+    console.log(state.hdr.identviv);
+
     if (!state.hdr?.identviv) {
       setError("hdrError", "Primero busque un registro de Hoja de Ruta o recupere uno guardado en Bloque AyB.");
       return;
@@ -3999,7 +4037,17 @@
 
     try {
       showOverlay("Cargando Bloque E...", "Buscando componentes de 10 años o más");
-      await cargarSelectorBloqueE(String(state.hdr.identviv || "").trim());
+
+      // //await cargarSelectorBloqueE(String(state.hdr.identviv || "").trim());
+      // await cargarSelectorBloqueE(parseInt(state.hdr.identviv || 0));
+
+      const viviendaIdBloqueE = String(parseInt(String(state.hdr.identviv || "").trim(), 10));
+
+      console.log("Bloque E - identviv original:", state.hdr.identviv);
+      console.log("Bloque E - viviendaId enviado:", viviendaIdBloqueE);
+
+      await cargarSelectorBloqueE(viviendaIdBloqueE);
+
       showScreen("bloqueEView");
     } catch (err) {
       console.error(err);
@@ -4043,8 +4091,22 @@
 
   async function cargarSelectorBloqueE(viviendaId) {
     const url = `${scriptUrl}?action=bloqueE_componentes&viviendaId=${encodeURIComponent(viviendaId)}`;
-    const res = await fetch(url);
-    const data = await res.json();
+    
+    // const res = await fetch(url);
+    // const data = await res.json();
+
+
+    console.log("Bloque E - URL:", url);
+
+    const res = await fetch(url + `&_=${Date.now()}`, { cache: "no-store" });
+    const raw = await res.text();
+
+    console.log("Bloque E - respuesta cruda:", raw);
+
+    const data = JSON.parse(raw);
+
+    console.log("Bloque E - JSON:", data);
+    
 
     if (!data.ok) {
       alert(data.message || 'No se pudieron cargar los componentes de Bloque E');
