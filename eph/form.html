@@ -1,4 +1,4 @@
-<!-- 25032026_1130 -->
+<!-- 26042026_2019 -->
 <!doctype html>
 <html lang="es">
 <head>
@@ -377,15 +377,6 @@
     }
 
 
-    /* .tableWrap{
-      width:100%;
-      overflow:auto;
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:14px;
-      background: rgba(255,255,255,.04);
-    } */
-
-
     .tableWrap{
       width:100%;
       max-width:100%;
@@ -398,9 +389,9 @@
       background: rgba(255,255,255,.04);
     }
 
-    .tableWrap table{
+    /* .tableWrap table{
       width:max-content;
-    }
+    } */
 
     .searchTable{
       width:100%;
@@ -465,14 +456,6 @@
       font-weight:700;
     }
 
-    /* .bloqueE-tableWrap{
-      overflow:auto;
-      border-radius:16px;
-      border:1px solid #e5e7eb;
-      background:#fff;
-      box-shadow:0 10px 30px rgba(0,0,0,.06);
-    } */
-
     .bloqueE-tableWrap{
       width:100%;
       max-width:100%;
@@ -487,13 +470,13 @@
     }
 
     /* .bloqueE-table{
-      width:100%;
-      border-collapse:collapse;
+      width:max-content;
       min-width:760px;
+      border-collapse:collapse;
     } */
 
     .bloqueE-table{
-      width:max-content;
+      width:100%;
       min-width:760px;
       border-collapse:collapse;
     }
@@ -686,6 +669,60 @@
       color:#111827 !important;
       cursor:not-allowed;
       opacity:1 !important;
+    }
+
+    @media (max-width: 720px){
+
+      body{
+        display:block;
+        padding:10px;
+        overflow-x:hidden;
+      }
+
+      .app{
+        width:100%;
+      }
+
+      .card{
+        overflow:visible;
+      }
+
+      .content{
+        padding:14px;
+      }
+
+      .blockBtns{
+        display:grid;
+        grid-template-columns:1fr;
+        gap:10px;
+      }
+
+      .blockBtns .btn{
+        width:100%;
+      }
+
+      .bloqueE-wrap{
+        width:100%;
+        max-width:100%;
+        padding:10px 0;
+      }
+
+      .bloqueE-actions{
+        display:grid;
+        grid-template-columns:1fr;
+        gap:10px;
+      }
+
+      .bloqueE-actions .btnE{
+        width:100%;
+      }
+
+      .bloqueE-tableWrap{
+        width:100%;
+        overflow-x:auto;
+        overflow-y:hidden;
+        -webkit-overflow-scrolling:touch;
+      }
     }
 
   </style>
@@ -4038,8 +4075,7 @@
     try {
       showOverlay("Cargando Bloque E...", "Buscando componentes de 10 años o más");
 
-      // //await cargarSelectorBloqueE(String(state.hdr.identviv || "").trim());
-      // await cargarSelectorBloqueE(parseInt(state.hdr.identviv || 0));
+
 
       const viviendaIdBloqueE = String(parseInt(String(state.hdr.identviv || "").trim(), 10));
 
@@ -4092,10 +4128,6 @@
   async function cargarSelectorBloqueE(viviendaId) {
     const url = `${scriptUrl}?action=bloqueE_componentes&viviendaId=${encodeURIComponent(viviendaId)}`;
     
-    // const res = await fetch(url);
-    // const data = await res.json();
-
-
     console.log("Bloque E - URL:", url);
 
     const res = await fetch(url + `&_=${Date.now()}`, { cache: "no-store" });
