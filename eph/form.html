@@ -369,7 +369,7 @@
       display:grid;
       grid-template-columns:1fr;
       gap:16px;
-      margin-top:18px;
+      margin-top:22px;
     }
 
     .small{
@@ -725,7 +725,7 @@
         display:flex;
         flex-direction:column;
         gap:16px;
-        margin-top:24px;
+        margin-top:33px;
       }
 
       .bloqueE-actions .btnE{
@@ -4101,12 +4101,16 @@
 
       showScreen("bloqueEView");
 
-      setTimeout(() => {
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth"
-        });
-      }, 100);
+      // setTimeout(() => {
+      //   window.scrollTo({
+      //     top: 0,
+      //     behavior: "smooth"
+      //   });
+      // }, 100);
+
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+      });
 
     } catch (err) {
       console.error(err);
