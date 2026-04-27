@@ -358,19 +358,19 @@
       display:none;
     }
 
-    /* .blockBtns{
+    .blockBtns{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
       margin-top: 12px;
-    } */
+    }
 
-    .blockBtns{
+    /* .blockBtns{
       display:grid;
       grid-template-columns:1fr;
       gap:16px;
       margin-top:42px;
-    }
+    } */
 
     .small{
       font-size: 13px;
@@ -528,12 +528,19 @@
       outline-offset:-2px;
     }
 
-    .bloqueE-actions{
+    /* .bloqueE-actions{
       display:flex;
       justify-content:space-between;
       gap:12px;
       margin-top:18px;
       flex-wrap:wrap;
+    } */
+
+    .bloqueE-actions{
+      display:flex;
+      flex-direction:column;
+      gap:24px;
+      margin-top:28px;
     }
 
     .btnE{
@@ -698,10 +705,17 @@
         padding:14px;
       }
 
+      /* .blockBtns{
+        display:grid;
+        grid-template-columns:1fr;
+        gap:22px;
+      } */
+
       .blockBtns{
         display:grid;
         grid-template-columns:1fr;
-        gap:10px;
+        gap:22px;
+        margin-top:22px;
       }
 
       .blockBtns .btn{
@@ -714,19 +728,19 @@
         padding:10px 0;
       }
 
-      /* .bloqueE-actions{
+      .bloqueE-actions{
         display:grid;
         grid-template-columns:1fr;
         gap:10px;
       }
-      */
+     
 
-      .bloqueE-actions{
+      /* .bloqueE-actions{
         display:flex;
         flex-direction:column;
         gap:16px;
         margin-top:33px;
-      }
+      } */
 
       .bloqueE-actions .btnE{
         width:100%;
@@ -4108,9 +4122,10 @@
       //   });
       // }, 100);
 
-      //requestAnimationFrame(() => {
-      //  window.scrollTo(0, 0);
-      //});
+
+      // requestAnimationFrame(() => {
+      //   window.scrollTo(0, 0);
+      // });
 
       setTimeout(() => {
         document.body.scrollTop = 0;
