@@ -528,20 +528,20 @@
       outline-offset:-2px;
     }
 
-    /* .bloqueE-actions{
+    .bloqueE-actions{
       display:flex;
       justify-content:space-between;
       gap:12px;
       margin-top:18px;
       flex-wrap:wrap;
-    } */
+    }
 
-    .bloqueE-actions{
+    /* .bloqueE-actions{
       display:flex;
       flex-direction:column;
       gap:24px;
       margin-top:28px;
-    }
+    } */
 
     .btnE{
       border:none;
@@ -715,7 +715,7 @@
         display:grid;
         grid-template-columns:1fr;
         gap:22px;
-        margin-top:22px;
+        margin-top:27px;
       }
 
       .blockBtns .btn{
@@ -728,10 +728,17 @@
         padding:10px 0;
       }
 
-      .bloqueE-actions{
+      /* .bloqueE-actions{
         display:grid;
         grid-template-columns:1fr;
         gap:10px;
+      } */
+
+      .bloqueE-actions{
+        display:grid;
+        grid-template-columns:1fr;
+        gap:16px;
+        margin-top:24px;
       }
      
 
@@ -4127,10 +4134,16 @@
       //   window.scrollTo(0, 0);
       // });
 
-      setTimeout(() => {
-        document.body.scrollTop = 0;
-        document.documentElement.scrollTop = 0;
-      }, 50);
+      // setTimeout(() => {
+      //   document.body.scrollTop = 0;
+      //   document.documentElement.scrollTop = 0;
+      // }, 50);
+
+      await nextFrame();
+      await nextFrame();
+
+      subirPantallaAlInicio("#bloqueEView");
+      
 
     } catch (err) {
       console.error(err);
@@ -4339,6 +4352,28 @@
     initBloqueESiNoButton("btnE_entrealiz", "entrealizbloqe");
   }
 
+
+  function subirPantallaAlInicio(selector = null){
+    const el = selector ? document.querySelector(selector) : null;
+
+    document.scrollingElement.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    window.scrollTo(0, 0);
+
+    document.querySelectorAll(".app, .card, .content, .screen").forEach(x => {
+      if (x && typeof x.scrollTop === "number") x.scrollTop = 0;
+    });
+
+    if(el){
+      el.scrollIntoView({
+        behavior: "auto",
+        block: "start",
+        inline: "nearest"
+      });
+    }
+  }
 
 
   function setSiNo(field, value) {
