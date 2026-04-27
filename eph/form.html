@@ -358,11 +358,18 @@
       display:none;
     }
 
-    .blockBtns{
+    /* .blockBtns{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
       margin-top: 12px;
+    } */
+
+    .blockBtns{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:16px;
+      margin-top:18px;
     }
 
     .small{
@@ -707,10 +714,18 @@
         padding:10px 0;
       }
 
-      .bloqueE-actions{
+      /* .bloqueE-actions{
         display:grid;
         grid-template-columns:1fr;
         gap:10px;
+      }
+      */
+
+      .bloqueE-actions{
+        display:flex;
+        flex-direction:column;
+        gap:16px;
+        margin-top:24px;
       }
 
       .bloqueE-actions .btnE{
@@ -4085,6 +4100,14 @@
       await cargarSelectorBloqueE(viviendaIdBloqueE);
 
       showScreen("bloqueEView");
+
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+      }, 100);
+
     } catch (err) {
       console.error(err);
       setError("hdrError", "No se pudo abrir el Bloque E.");
