@@ -1,4 +1,4 @@
-<!-- 11052026_0700 -->
+<!-- 11052026_0726 -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -139,11 +139,86 @@
     let intervalId = null;
     let ultimosRostros = [];
 
+    let margenArribaValor = 0.400;
+    let margenAbajoValor = 0.10;
+    let margenCostadosValor = 0.10;
+
     const btnGuardar = document.createElement("button");
     btnGuardar.textContent = "Guardar rostro como PNG";
     btnGuardar.className = "secondary";
     btnGuardar.style.display = "none";
     document.querySelector(".actions").appendChild(btnGuardar);
+
+
+    const inputArriba = document.createElement("input");
+    inputArriba.type = "text";
+    inputArriba.placeholder = "Arriba";
+    inputArriba.value = "400";
+    inputArriba.inputMode = "numeric";
+    inputArriba.pattern = "[0-9]*";
+    inputArriba.maxLength = 3;
+    inputArriba.oninput = () => {
+      inputArriba.value = inputArriba.value.replace(/\D/g, "");
+    };
+
+    const inputAbajo = document.createElement("input");
+    inputAbajo.type = "text";
+    inputAbajo.placeholder = "Abajo";
+    inputAbajo.value = "10";
+    inputAbajo.inputMode = "numeric";
+    inputAbajo.pattern = "[0-9]*";
+    inputAbajo.maxLength = 3;
+    inputAbajo.oninput = () => {
+      inputAbajo.value = inputAbajo.value.replace(/\D/g, "");
+    };
+
+    const inputCostados = document.createElement("input");
+    inputCostados.type = "text";
+    inputCostados.placeholder = "Costados";
+    inputCostados.value = "10";
+    inputCostados.inputMode = "numeric";
+    inputCostados.pattern = "[0-9]*";
+    inputCostados.maxLength = 3;
+    inputCostados.oninput = () => {
+      inputCostados.value = inputCostados.value.replace(/\D/g, "");
+    };
+
+    [inputArriba, inputAbajo, inputCostados].forEach(input => {
+      input.style.width = "90px";
+      input.style.height = "44px";
+      input.style.borderRadius = "12px";
+      input.style.border = "1px solid rgba(255,255,255,0.15)";
+      input.style.background = "rgba(255,255,255,0.08)";
+      input.style.color = "white";
+      input.style.padding = "0 12px";
+      input.style.fontSize = "15px";
+      input.style.outline = "none";
+    });
+
+    const btnSetear = document.createElement("button");
+    btnSetear.textContent = "Setear";
+
+    btnSetear.addEventListener("click", () => {
+
+      const arriba = Number(inputArriba.value || 0);
+      const abajo = Number(inputAbajo.value || 0);
+      const costados = Number(inputCostados.value || 0);
+
+      margenArribaValor = arriba / 1000;
+      margenAbajoValor = abajo / 100;
+      margenCostadosValor = costados / 100;
+
+      statusText.textContent =
+        `Márgenes actualizados → Arriba ${margenArribaValor.toFixed(3)} | ` +
+        `Abajo ${margenAbajoValor.toFixed(2)} | ` +
+        `Costados ${margenCostadosValor.toFixed(2)}`;
+    });
+
+    document.querySelector(".actions").appendChild(inputArriba);
+    document.querySelector(".actions").appendChild(inputAbajo);
+    document.querySelector(".actions").appendChild(inputCostados);
+    document.querySelector(".actions").appendChild(btnSetear);
+
 
     function dosDigitos(n) {
       return String(n).padStart(2, "0");
@@ -215,20 +290,21 @@
         };
 
         const resized = faceapi.resizeResults(detections, displaySize);
-        ultimosRostros = resized.map(det => det.box);
+        //ultimosRostros = resized.map(det => det.box);
+
+        ultimosRostros = resized.map(det => ampliarCajaRostro(det.box));
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        resized.forEach(det => {
-          const box = det.box;
-
+        ultimosRostros.forEach(box => {
           ctx.strokeStyle = "#00ff88";
           ctx.lineWidth = 4;
           ctx.strokeRect(box.x, box.y, box.width, box.height);
 
           ctx.fillStyle = "rgba(0, 255, 136, 0.9)";
           ctx.font = "20px Arial";
-          ctx.fillText("Rostro", box.x, Math.max(box.y - 8, 22));
+          //ctx.fillText("Rostro ampliado", box.x, Math.max(box.y - 8, 22));
+          ctx.fillText("Rostro detectado", box.x, Math.max(box.y - 8, 22));
         });
 
         if (resized.length > 0) {
@@ -242,6 +318,33 @@
             ? "1 rostro detectado"
             : `${resized.length} rostros detectados`;
       }, 120);
+    }
+
+    function ampliarCajaRostro(box) {
+
+      const margenArriba = box.height * margenArribaValor;
+      const margenAbajo = box.height * margenAbajoValor;
+      const margenCostados = box.width * margenCostadosValor;
+
+      const x = Math.max(0, Math.round(box.x - margenCostados));
+      const y = Math.max(0, Math.round(box.y - margenArriba));
+
+      const derecha = Math.min(
+        video.videoWidth,
+        Math.round(box.x + box.width + margenCostados)
+      );
+
+      const abajo = Math.min(
+        video.videoHeight,
+        Math.round(box.y + box.height + margenAbajo)
+      );
+
+      return {
+        x,
+        y,
+        width: derecha - x,
+        height: abajo - y
+      };
     }
 
     function descargarRostrosComoPNG() {
