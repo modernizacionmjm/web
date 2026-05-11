@@ -260,11 +260,6 @@
       try {
         await cargarModelo();
 
-        // stream = await navigator.mediaDevices.getUserMedia({
-        //   video: { facingMode: "user" },
-        //   audio: false
-        // });
-
         stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: camaraActual },
           audio: false
@@ -309,18 +304,6 @@
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // resized.forEach(det => {
-        //   const box = det.box;
-
-        //   ctx.strokeStyle = "#00ff88";
-        //   ctx.lineWidth = 4;
-        //   ctx.strokeRect(box.x, box.y, box.width, box.height);
-
-        //   ctx.fillStyle = "rgba(0, 255, 136, 0.9)";
-        //   ctx.font = "20px Arial";
-        //   ctx.fillText("Rostro", box.x, Math.max(box.y - 8, 22));
-        // });
-
         ultimosRostros.forEach(box => {
           ctx.strokeStyle = "#00ff88";
           ctx.lineWidth = 4;
@@ -345,41 +328,6 @@
       }, 120);
     }
 
-    // function ampliarCajaRostro(box) {
-    //   const margenArriba = box.height * 0.350;
-    //   const margenAbajo = box.height * 0.10;
-    //   const margenCostados = box.width * 0.10;
-
-
-
-    //   // Por ejemplo, si querés más cabeza:
-    //   // const margenArriba = box.height * 0.60;
-
-    //   // Si querés más cuello:
-    //   // const margenAbajo = box.height * 0.40;
-
-
-
-    //   const x = Math.max(0, Math.round(box.x - margenCostados));
-    //   const y = Math.max(0, Math.round(box.y - margenArriba));
-
-    //   const derecha = Math.min(
-    //     video.videoWidth,
-    //     Math.round(box.x + box.width + margenCostados)
-    //   );
-
-    //   const abajo = Math.min(
-    //     video.videoHeight,
-    //     Math.round(box.y + box.height + margenAbajo)
-    //   );
-
-    //   return {
-    //     x,
-    //     y,
-    //     width: derecha - x,
-    //     height: abajo - y
-    //   };
-    // }
 
     function ampliarCajaRostro(box) {
 
@@ -415,50 +363,6 @@
       }
 
       const nombreBase = fechaHoraNombre();
-
-      // ultimosRostros.forEach((box, index) => {
-      //   const tempCanvas = document.createElement("canvas");
-      //   const tempCtx = tempCanvas.getContext("2d");
-
-      //   // const x = Math.max(0, Math.round(box.x));
-      //   // const y = Math.max(0, Math.round(box.y));
-      //   // const w = Math.round(box.width);
-      //   // const h = Math.round(box.height);
-
-      //   const cajaAmpliada = ampliarCajaRostro(box);
-
-      //   const x = cajaAmpliada.x;
-      //   const y = cajaAmpliada.y;
-      //   const w = cajaAmpliada.width;
-      //   const h = cajaAmpliada.height;
-
-      //   tempCanvas.width = w;
-      //   tempCanvas.height = h;
-
-      //   tempCtx.drawImage(
-      //     video,
-      //     x,
-      //     y,
-      //     w,
-      //     h,
-      //     0,
-      //     0,
-      //     w,
-      //     h
-      //   );
-
-      //   const link = document.createElement("a");
-      //   link.href = tempCanvas.toDataURL("image/png");
-
-      //   link.download =
-      //     ultimosRostros.length === 1
-      //       ? `camdet_${nombreBase}.png`
-      //       : `camdet_${nombreBase}_${index + 1}.png`;
-
-      //   document.body.appendChild(link);
-      //   link.click();
-      //   document.body.removeChild(link);
-      // });
 
       ultimosRostros.forEach((box, index) => {
         const tempCanvas = document.createElement("canvas");
