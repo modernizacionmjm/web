@@ -1,3 +1,4 @@
+<!-- 11052026_0700 -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -136,6 +137,33 @@
 
     let stream = null;
     let intervalId = null;
+    let ultimosRostros = [];
+
+    const btnGuardar = document.createElement("button");
+    btnGuardar.textContent = "Guardar rostro como PNG";
+    btnGuardar.className = "secondary";
+    btnGuardar.style.display = "none";
+    document.querySelector(".actions").appendChild(btnGuardar);
+
+    function dosDigitos(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function fechaHoraNombre() {
+      const d = new Date();
+
+      const fecha =
+        dosDigitos(d.getDate()) +
+        dosDigitos(d.getMonth() + 1) +
+        d.getFullYear();
+
+      const hora =
+        dosDigitos(d.getHours()) +
+        dosDigitos(d.getMinutes()) +
+        dosDigitos(d.getSeconds());
+
+      return `${fecha}_${hora}`;
+    }
 
     async function cargarModelo() {
       statusText.textContent = "Cargando modelo de detección...";
@@ -150,9 +178,7 @@
         await cargarModelo();
 
         stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: "user"
-          },
+          video: { facingMode: "user" },
           audio: false
         });
 
@@ -163,7 +189,6 @@
           canvas.height = video.videoHeight;
           detectarRostros();
         };
-
       } catch (error) {
         console.error(error);
         statusText.textContent = "No se pudo acceder a la cámara.";
@@ -190,6 +215,7 @@
         };
 
         const resized = faceapi.resizeResults(detections, displaySize);
+        ultimosRostros = resized.map(det => det.box);
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -205,12 +231,68 @@
           ctx.fillText("Rostro", box.x, Math.max(box.y - 8, 22));
         });
 
+        if (resized.length > 0) {
+          btnGuardar.style.display = "inline-block";
+        } else {
+          btnGuardar.style.display = "none";
+        }
+
         statusText.textContent =
           resized.length === 1
             ? "1 rostro detectado"
             : `${resized.length} rostros detectados`;
-
       }, 120);
+    }
+
+    function descargarRostrosComoPNG() {
+      if (!ultimosRostros.length) {
+        statusText.textContent = "No hay rostros para guardar.";
+        return;
+      }
+
+      const nombreBase = fechaHoraNombre();
+
+      ultimosRostros.forEach((box, index) => {
+        const tempCanvas = document.createElement("canvas");
+        const tempCtx = tempCanvas.getContext("2d");
+
+        const x = Math.max(0, Math.round(box.x));
+        const y = Math.max(0, Math.round(box.y));
+        const w = Math.round(box.width);
+        const h = Math.round(box.height);
+
+        tempCanvas.width = w;
+        tempCanvas.height = h;
+
+        tempCtx.drawImage(
+          video,
+          x,
+          y,
+          w,
+          h,
+          0,
+          0,
+          w,
+          h
+        );
+
+        const link = document.createElement("a");
+        link.href = tempCanvas.toDataURL("image/png");
+
+        link.download =
+          ultimosRostros.length === 1
+            ? `camdet_${nombreBase}.png`
+            : `camdet_${nombreBase}_${index + 1}.png`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+
+      statusText.textContent =
+        ultimosRostros.length === 1
+          ? "Rostro guardado como PNG."
+          : `${ultimosRostros.length} rostros guardados como PNG.`;
     }
 
     function detenerCamara() {
@@ -224,12 +306,15 @@
         stream = null;
       }
 
+      ultimosRostros = [];
+      btnGuardar.style.display = "none";
       video.srcObject = null;
       statusText.textContent = "Cámara detenida.";
     }
 
     btnStart.addEventListener("click", iniciarCamara);
     btnStop.addEventListener("click", detenerCamara);
+    btnGuardar.addEventListener("click", descargarRostrosComoPNG);
   </script>
 </body>
 </html>
