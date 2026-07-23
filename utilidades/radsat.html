@@ -1,1 +1,936 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#f4f1ea"><meta name="description" content="Info meteorológica y sísmica en un solo lugar."><title>Monitor territorial · Jesús María</title><link rel="icon" type="image/png" href="https://raw.githubusercontent.com/modernizacionmjm/web/refs/heads/main/Logos/favicon.ico" /><style> :root { color-scheme: light; --paper: #f4f1ea; --paper-strong: #ebe6dc; --ink: #14201c; --muted: #66716b; --line: rgba(20, 32, 28, .12); --accent: #e9663d; --accent-soft: #f7dfd4; --white: #fff; --viewer: #101713; --header-height: 84px; --radius: 18px; --ease: cubic-bezier(.22, 1, .36, 1); } * { box-sizing: border-box; } html, body { height: 100%; } body { margin: 0; min-width: 320px; overflow: hidden; background: var(--paper); color: var(--ink); font-family: Inter, "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; } button, a { -webkit-tap-highlight-color: transparent; } button { font: inherit; } .shell { display: grid; grid-template-rows: var(--header-height) minmax(0, 1fr); height: 100vh; height: 100dvh; padding: 0 18px 18px; } .topbar { display: flex; align-items: center; gap: 24px; min-width: 0; } .brand { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; min-width: 0; } .brand-mark { display: grid; width: 39px; height: 39px; place-items: center; border-radius: 12px; background: var(--ink); color: var(--paper); } .brand-mark svg { width: 23px; height: 23px; } .brand-copy { line-height: 1; } .brand-kicker { margin: 0 0 6px; color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; } .brand-title { margin: 0; font-size: 17px; font-weight: 720; letter-spacing: -.025em; } .tabs { display: flex; align-items: center; gap: 4px; margin-left: auto; padding: 5px; border: 1px solid var(--line); border-radius: 15px; background: rgba(255, 255, 255, .46); } .tab { position: relative; display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 116px; height: 44px; padding: 0 16px; border: 0; border-radius: 11px; background: transparent; color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 680; transition: color .2s ease, background .25s var(--ease), transform .2s ease; } .tab svg { width: 18px; height: 18px; flex: 0 0 auto; stroke-width: 1.8; } .tab:hover { color: var(--ink); } .tab:active { transform: scale(.97); } .tab[aria-selected="true"] { background: var(--ink); color: var(--white); } .tab:focus-visible, .external-link:focus-visible, .primary-link:focus-visible { outline: 3px solid rgba(233, 102, 61, .34); outline-offset: 3px; } .viewer { position: relative; display: grid; grid-template-rows: 48px minmax(0, 1fr); min-width: 0; min-height: 0; overflow: hidden; border-radius: var(--radius); background: var(--viewer); box-shadow: 0 1px 0 rgba(255,255,255,.65) inset; } .viewer-head { position: relative; z-index: 5; display: flex; align-items: center; min-width: 0; padding: 0 13px 0 17px; border-bottom: 1px solid rgba(255,255,255,.08); color: var(--white); background: #151e19; } .viewer-ident { display: flex; align-items: center; gap: 9px; min-width: 0; } .live-dot { position: relative; width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: #72d497; box-shadow: 0 0 0 4px rgba(114,212,151,.11); } .viewer-title { overflow: hidden; font-size: 12px; font-weight: 760; letter-spacing: .055em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; } .viewer-source { overflow: hidden; margin-left: 8px; color: rgba(255,255,255,.48); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; } .external-link { display: inline-flex; align-items: center; gap: 7px; height: 32px; margin-left: auto; padding: 0 11px; border: 1px solid rgba(255,255,255,.13); border-radius: 9px; color: rgba(255,255,255,.84); text-decoration: none; font-size: 11px; font-weight: 700; transition: background .2s ease, border-color .2s ease, color .2s ease; } .external-link:hover { border-color: rgba(255,255,255,.24); background: rgba(255,255,255,.08); color: var(--white); } .external-link svg { width: 14px; height: 14px; } .panels { position: relative; min-width: 0; min-height: 0; background: #202823; } .panel { position: absolute; inset: 0; visibility: hidden; opacity: 0; transform: scale(.995); transition: opacity .26s ease, transform .4s var(--ease), visibility 0s linear .4s; } .panel.active { z-index: 2; visibility: visible; opacity: 1; transform: scale(1); transition-delay: 0s; } .panel iframe { display: block; width: 100%; height: 100%; border: 0; background: #202823; } .loader { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; background: radial-gradient(circle at 30% 25%, rgba(233,102,61,.11), transparent 26%), linear-gradient(145deg, #1b241f, #111814); color: rgba(255,255,255,.7); transition: opacity .35s ease, visibility .35s ease; } .panel.loaded .loader { visibility: hidden; opacity: 0; } .loader-inner { display: grid; justify-items: center; gap: 13px; } .embed-fallback { display: none; width: min(420px, calc(100% - 40px)); justify-items: center; text-align: center; } .panel.load-slow .loader-inner { display: none; } .panel.load-slow .embed-fallback { display: grid; gap: 14px; } .fallback-icon { display: grid; width: 48px; height: 48px; place-items: center; border: 1px solid rgba(255,255,255,.13); border-radius: 15px; color: var(--accent); background: rgba(255,255,255,.04); } .fallback-icon svg { width: 22px; height: 22px; } .fallback-title { margin: 2px 0 0; color: var(--white); font-size: 17px; font-weight: 720; letter-spacing: -.02em; } .fallback-copy { max-width: 360px; margin: -6px 0 4px; color: rgba(255,255,255,.57); font-size: 13px; line-height: 1.55; } .fallback-link { display: inline-flex; align-items: center; min-height: 42px; padding: 0 16px; border-radius: 11px; background: var(--accent); color: var(--white); text-decoration: none; font-size: 12px; font-weight: 760; } .spinner { width: 31px; height: 31px; border: 2px solid rgba(255,255,255,.15); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; } .loader-label { font-size: 11px; font-weight: 730; letter-spacing: .11em; text-transform: uppercase; } @keyframes spin { to { transform: rotate(360deg); } } .flight-panel { overflow: hidden; background: #121a16; color: var(--white); } .flight-grid { position: absolute; inset: 0; opacity: .22; background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(90deg, #000, transparent 82%); } .radar-art { position: absolute; top: 50%; right: clamp(-170px, -4vw, -50px); width: min(62vw, 740px); aspect-ratio: 1; border: 1px solid rgba(114,212,151,.16); border-radius: 50%; transform: translateY(-50%); } .radar-art::before, .radar-art::after { content: ""; position: absolute; inset: 17%; border: 1px solid rgba(114,212,151,.18); border-radius: 50%; } .radar-art::after { inset: 35%; } .radar-line { position: absolute; inset: 50% 0 auto 50%; width: 48%; height: 1px; transform-origin: left center; background: linear-gradient(90deg, rgba(114,212,151,.8), transparent); animation: sweep 5s linear infinite; } .radar-sweep { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 250deg, transparent 0 75%, rgba(114,212,151,.13) 94%, transparent 100%); animation: sweep 5s linear infinite; } @keyframes sweep { to { transform: rotate(360deg); } } .plane { position: absolute; top: 31%; left: 42%; color: var(--accent); filter: drop-shadow(0 0 12px rgba(233,102,61,.45)); transform: rotate(24deg); } .plane svg { width: 29px; height: 29px; } .flight-content { position: relative; z-index: 2; display: flex; flex-direction: column; justify-content: center; width: min(590px, 62%); height: 100%; padding: clamp(30px, 6vw, 92px); } .eyebrow { display: flex; align-items: center; gap: 9px; margin: 0 0 20px; color: #92caa5; font-size: 11px; font-weight: 780; letter-spacing: .15em; text-transform: uppercase; } .eyebrow::before { content: ""; width: 24px; height: 1px; background: currentColor; } .flight-title { max-width: 520px; margin: 0; font-size: clamp(38px, 5.2vw, 76px); font-weight: 680; letter-spacing: -.055em; line-height: .98; } .flight-copy { max-width: 460px; margin: 22px 0 30px; color: rgba(255,255,255,.61); font-size: clamp(14px, 1.4vw, 17px); line-height: 1.58; } .primary-link { display: inline-flex; align-items: center; align-self: flex-start; gap: 10px; min-height: 48px; padding: 0 19px; border-radius: 12px; background: var(--accent); color: var(--white); text-decoration: none; font-size: 13px; font-weight: 760; box-shadow: 0 9px 26px rgba(233,102,61,.2); transition: transform .2s ease, background .2s ease; } .primary-link:hover { background: #f2744c; transform: translateY(-2px); } .primary-link:active { transform: translateY(0) scale(.98); } .primary-link svg { width: 17px; height: 17px; } .noscript { position: fixed; inset: 20px; z-index: 20; display: grid; place-items: center; padding: 25px; border-radius: 16px; background: var(--ink); color: var(--white); text-align: center; } @media (max-width: 790px) { :root { --header-height: 68px; --radius: 14px; } .shell { grid-template-rows: var(--header-height) minmax(0, 1fr) 76px; padding: 0 10px max(7px, env(safe-area-inset-bottom)); } .topbar { display: contents; } .brand { grid-row: 1; align-self: center; padding: 0 3px; } .brand-mark { width: 36px; height: 36px; border-radius: 11px; } .brand-kicker { display: none; } .brand-title { font-size: 16px; } .tabs { grid-row: 3; align-self: end; width: 100%; height: 68px; margin: 8px 0 0; padding: 4px; border-radius: 16px; background: rgba(255,255,255,.62); backdrop-filter: blur(18px); } .tab { flex: 1 1 25%; flex-direction: column; gap: 4px; min-width: 0; height: 58px; padding: 0 4px; border-radius: 12px; font-size: 10px; letter-spacing: .01em; } .tab svg { width: 19px; height: 19px; } .viewer { grid-row: 2; } .viewer-source { display: none; } .external-link span { display: none; } .external-link { width: 34px; padding: 0; justify-content: center; } .flight-content { justify-content: flex-end; width: 100%; padding: 30px 24px 40px; background: linear-gradient(0deg, rgba(18,26,22,.98) 10%, rgba(18,26,22,.55) 68%, transparent 100%); } .flight-title { max-width: 330px; font-size: clamp(39px, 12vw, 58px); } .flight-copy { max-width: 380px; margin: 16px 0 23px; font-size: 14px; } .eyebrow { margin-bottom: 14px; } .radar-art { top: 28%; right: -25vw; width: 100vw; } } @media (max-width: 390px) { .brand-title { font-size: 15px; } .viewer-head { padding-left: 13px; } .flight-content { padding-inline: 20px; } } @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } } </style></head><body><main class="shell"><header class="topbar"><div class="brand" aria-label="Municipalidad de Jesús María"><img src="https://raw.githubusercontent.com/modernizacionmjm/web/refs/heads/main/Logos/LogoDef.png" alt="Municipalidad de Jesús María" style="display:block; width:auto; height:52px; max-width:70vw; object-fit:contain;" ></div><nav class="tabs" role="tablist" aria-label="Fuentes de monitoreo"><button class="tab" id="tab-radsat" role="tab" aria-selected="true" aria-controls="panel-radsat" data-view="radsat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M8.6 14.8a5 5 0 0 1 0-7.1M5.8 17.6a9 9 0 0 1 0-12.7" stroke-linecap="round"/><path d="M14.6 9.4 21 3m-4.8.5 4.3 4.3M9.8 13.2l4.9 1.1 1.1 4.9-3 3-4.2-7.8 1.2-1.2Z" stroke-linecap="round" stroke-linejoin="round"/></svg><span>RadSat</span></button><button class="tab" id="tab-temperatura" role="tab" aria-selected="false" aria-controls="panel-temperatura" data-view="temperatura" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M14 14.8V5a4 4 0 0 0-8 0v9.8a6 6 0 1 0 8 0Z" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 7v9m0 0a2.2 2.2 0 1 0 0 4.4A2.2 2.2 0 0 0 10 16Z" stroke-linecap="round"/></svg><span>Temperatura</span></button><button class="tab" id="tab-sismos" role="tab" aria-selected="false" aria-controls="panel-sismos" data-view="sismos" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M3 13h3l2.1-5 3.2 10 2.5-7 1.8 4H21" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 5h16M4 21h16" opacity=".45" stroke-linecap="round"/></svg><span>Sismos</span></button></nav></header><section class="viewer" aria-live="polite"><div class="viewer-head"><div class="viewer-ident"><span class="live-dot" aria-hidden="true"></span><span class="viewer-title" id="current-title">RadSat</span><span class="viewer-source" id="current-source">Imágenes satelitales · Windy</span></div><a class="external-link" id="external-link" href="https://www.windy.com/-31.196/-64.012?satellite,-31.196,-64.012,9" target="_blank" rel="noopener noreferrer" aria-label="Abrir RadSat en una nueva pestaña"><span>Abrir fuente</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M14 5h5v5M13 11l6-6M19 14v5H5V5h5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div><div class="panels"><section class="panel active" id="panel-radsat" role="tabpanel" aria-labelledby="tab-radsat" data-view="radsat"><div class="loader"><div class="loader-inner" aria-hidden="true"><span class="spinner"></span><span class="loader-label">Cargando satélite</span></div><div class="embed-fallback"><span class="fallback-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7.5 17.5 17 8m-6-1h7v7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 18H6V6h3" opacity=".6" stroke-width="1.8" stroke-linecap="round"/></svg></span><p class="fallback-title">El mapa está tardando</p><p class="fallback-copy">Podés continuar la consulta directamente en Windy.</p><a class="fallback-link" href="https://www.windy.com/-31.196/-64.012?satellite,-31.196,-64.012,9" target="_blank" rel="noopener noreferrer">Abrir mapa satelital</a></div></div><iframe title="Mapa satelital y radar de Windy" data-src="https://embed.windy.com/embed.html?type=map&amp;location=coordinates&amp;metricRain=mm&amp;metricTemp=default&amp;metricWind=default&amp;zoom=9&amp;overlay=satellite&amp;product=satellite&amp;level=surface&amp;lat=-31.196&amp;lon=-64.012" allowfullscreen loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></section><section class="panel" id="panel-temperatura" role="tabpanel" aria-labelledby="tab-temperatura" data-view="temperatura" hidden><div class="loader"><div class="loader-inner" aria-hidden="true"><span class="spinner"></span><span class="loader-label">Cargando temperatura</span></div><div class="embed-fallback"><span class="fallback-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7.5 17.5 17 8m-6-1h7v7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 18H6V6h3" opacity=".6" stroke-width="1.8" stroke-linecap="round"/></svg></span><p class="fallback-title">El mapa está tardando</p><p class="fallback-copy">Podés continuar la consulta directamente en Windy.</p><a class="fallback-link" href="https://www.windy.com/-31.036/-64.124?temp,-31.036,-64.124,10" target="_blank" rel="noopener noreferrer">Abrir temperatura</a></div></div><iframe title="Mapa de temperatura de Windy" data-src="https://embed.windy.com/embed2.html?lat=-31.036&amp;lon=-64.124&amp;detailLat=-31.015&amp;detailLon=-64.072&amp;width=650&amp;height=450&amp;zoom=10&amp;level=surface&amp;overlay=temp&amp;product=ecmwf&amp;menu=&amp;message=&amp;marker=&amp;calendar=now&amp;pressure=&amp;type=map&amp;location=coordinates&amp;detail=&amp;metricWind=default&amp;metricTemp=default&amp;radarRange=-1" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></section><section class="panel" id="panel-sismos" role="tabpanel" aria-labelledby="tab-sismos" data-view="sismos" hidden><div class="loader"><div class="loader-inner" aria-hidden="true"><span class="spinner"></span><span class="loader-label">Cargando INPRES</span></div><div class="embed-fallback"><span class="fallback-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7.5 17.5 17 8m-6-1h7v7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 18H6V6h3" opacity=".6" stroke-width="1.8" stroke-linecap="round"/></svg></span><p class="fallback-title">INPRES no respondió dentro del visor</p><p class="fallback-copy">Abrí la fuente oficial para consultar los últimos registros sísmicos.</p><a class="fallback-link" href="https://www.inpres.gob.ar/desktop/" target="_blank" rel="noopener noreferrer">Abrir INPRES</a></div></div><iframe title="Últimos sismos informados por INPRES" data-src="https://www.inpres.gob.ar/desktop/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></section><section class="panel flight-panel loaded" id="panel-vuelos" role="tabpanel" aria-labelledby="tab-vuelos" data-view="vuelos" hidden><div class="flight-grid" aria-hidden="true"></div><div class="radar-art" aria-hidden="true"><span class="radar-sweep"></span><span class="radar-line"></span><span class="plane"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m21.5 16.2-8.3-2.5V20l-2.7 1.7-1.4-8.9L3 10.9V8.7l6.1.2L10.5 3 13 4.4l.2 5.2 8.3 2.5v4.1Z"/></svg></span></div><div class="flight-content"><p class="eyebrow">Tránsito aéreo en vivo</p><h2 class="flight-title">El cielo, en tiempo real.</h2><p class="flight-copy">FlightRadar24 no permite mostrar su mapa dentro de otros sitios. Abrilo de forma segura para consultar vuelos sobre la región.</p><a class="primary-link" href="https://www.flightradar24.com/-32.38,-61.81/6" target="_blank" rel="noopener noreferrer"> Ver mapa de vuelos <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M6 12h12m-4-4 4 4-4 4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></section></div></section></main><noscript><div class="noscript">Este monitor necesita JavaScript habilitado para cambiar entre las cuatro vistas.</div></noscript><script> (() => { const views = { radsat: { title: 'RadSat', source: 'Imágenes satelitales · Windy', url: 'https://www.windy.com/-31.196/-64.012?satellite,-31.196,-64.012,9' }, temperatura: { title: 'Temperatura', source: 'Modelo ECMWF · Windy', url: 'https://www.windy.com/-31.036/-64.124?temp,-31.036,-64.124,10' }, sismos: { title: 'Sismos', source: 'Últimos registros · INPRES', url: 'https://www.inpres.gob.ar/desktop/' }, vuelos: { title: 'Vuelos', source: 'Tránsito aéreo · FlightRadar24', url: 'https://www.flightradar24.com/-32.38,-61.81/6' } }; const tabs = [...document.querySelectorAll('[role="tab"]')]; const panels = [...document.querySelectorAll('[role="tabpanel"]')]; const currentTitle = document.getElementById('current-title'); const currentSource = document.getElementById('current-source'); const externalLink = document.getElementById('external-link'); function loadPanel(panel) { const frame = panel.querySelector('iframe[data-src]'); if (!frame || frame.src) return; frame.addEventListener('load', () => { panel.classList.remove('load-slow'); panel.classList.add('loaded'); }, { once: true }); frame.src = frame.dataset.src; window.setTimeout(() => { if (!panel.classList.contains('loaded')) panel.classList.add('load-slow'); }, 12000); } function selectView(name, updateHash = true) { const view = views[name] || views.radsat; tabs.forEach((tab) => { const selected = tab.dataset.view === name; tab.setAttribute('aria-selected', String(selected)); tab.tabIndex = selected ? 0 : -1; }); panels.forEach((panel) => { const selected = panel.dataset.view === name; panel.hidden = !selected; panel.classList.toggle('active', selected); if (selected) loadPanel(panel); }); currentTitle.textContent = view.title; currentSource.textContent = view.source; externalLink.href = view.url; externalLink.setAttribute('aria-label', `Abrir ${view.title} en una nueva pestaña`); if (updateHash && location.hash !== `#${name}`) { history.replaceState(null, '', `#${name}`); } } tabs.forEach((tab, index) => { tab.addEventListener('click', () => selectView(tab.dataset.view)); tab.addEventListener('keydown', (event) => { if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return; event.preventDefault(); let next = index; if (event.key === 'ArrowRight') next = (index + 1) % tabs.length; if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length; if (event.key === 'Home') next = 0; if (event.key === 'End') next = tabs.length - 1; tabs[next].focus(); selectView(tabs[next].dataset.view); }); }); window.addEventListener('hashchange', () => { const name = location.hash.slice(1); if (views[name]) selectView(name, false); }); const initial = location.hash.slice(1); selectView(views[initial] ? initial : 'radsat', false); })(); </script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f1ea">
+  <meta name="description" content="Info meteorológica y sísmica en un solo lugar.">
+  <title>Monitor territorial · Jesús María</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/modernizacionmjm/web/refs/heads/main/Logos/favicon.ico" />
+
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f4f1ea;
+      --paper-strong: #ebe6dc;
+      --ink: #14201c;
+      --muted: #66716b;
+      --line: rgba(20, 32, 28, .12);
+      --accent: #e9663d;
+      --accent-soft: #f7dfd4;
+      --white: #fff;
+      --viewer: #101713;
+      --header-height: 84px;
+      --radius: 18px;
+      --ease: cubic-bezier(.22, 1, .36, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      overflow: hidden;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    button { font: inherit; }
+
+    .shell {
+      display: grid;
+      grid-template-rows: var(--header-height) minmax(0, 1fr);
+      height: 100vh;
+      height: 100dvh;
+      padding: 0 18px 18px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      min-width: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 0 0 auto;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 39px;
+      height: 39px;
+      place-items: center;
+      border-radius: 12px;
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .brand-mark svg { width: 23px; height: 23px; }
+
+    .brand-copy { line-height: 1; }
+
+    .brand-kicker {
+      margin: 0 0 6px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 750;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 720;
+      letter-spacing: -.025em;
+    }
+
+    .tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
+      padding: 5px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, .46);
+    }
+
+    .tab {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 116px;
+      height: 44px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 11px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 680;
+      transition: color .2s ease, background .25s var(--ease), transform .2s ease;
+    }
+
+    .tab svg {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+      stroke-width: 1.8;
+    }
+
+    .tab:hover { color: var(--ink); }
+    .tab:active { transform: scale(.97); }
+
+    .tab[aria-selected="true"] {
+      background: var(--ink);
+      color: var(--white);
+    }
+
+    .tab:focus-visible,
+    .external-link:focus-visible,
+    .primary-link:focus-visible {
+      outline: 3px solid rgba(233, 102, 61, .34);
+      outline-offset: 3px;
+    }
+
+    .viewer {
+      position: relative;
+      display: grid;
+      grid-template-rows: 48px minmax(0, 1fr);
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: var(--viewer);
+      box-shadow: 0 1px 0 rgba(255,255,255,.65) inset;
+    }
+
+    .viewer-head {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      padding: 0 13px 0 17px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      color: var(--white);
+      background: #151e19;
+    }
+
+    .viewer-ident {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .live-dot {
+      position: relative;
+      width: 7px;
+      height: 7px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: #72d497;
+      box-shadow: 0 0 0 4px rgba(114,212,151,.11);
+    }
+
+    .viewer-title {
+      overflow: hidden;
+      font-size: 12px;
+      font-weight: 760;
+      letter-spacing: .055em;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .viewer-source {
+      overflow: hidden;
+      margin-left: 8px;
+      color: rgba(255,255,255,.48);
+      font-size: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .external-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      height: 32px;
+      margin-left: auto;
+      padding: 0 11px;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 9px;
+      color: rgba(255,255,255,.84);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 700;
+      transition: background .2s ease, border-color .2s ease, color .2s ease;
+    }
+
+    .external-link:hover {
+      border-color: rgba(255,255,255,.24);
+      background: rgba(255,255,255,.08);
+      color: var(--white);
+    }
+
+    .external-link svg { width: 14px; height: 14px; }
+
+    .panels {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      background: #202823;
+    }
+
+    .panel {
+      position: absolute;
+      inset: 0;
+      visibility: hidden;
+      opacity: 0;
+      transform: scale(.995);
+      transition: opacity .26s ease, transform .4s var(--ease), visibility 0s linear .4s;
+    }
+
+    .panel.active {
+      z-index: 2;
+      visibility: visible;
+      opacity: 1;
+      transform: scale(1);
+      transition-delay: 0s;
+    }
+
+    .panel iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #202823;
+    }
+
+    .loader {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(233,102,61,.11), transparent 26%),
+        linear-gradient(145deg, #1b241f, #111814);
+      color: rgba(255,255,255,.7);
+      transition: opacity .35s ease, visibility .35s ease;
+    }
+
+    .panel.loaded .loader {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    .loader-inner {
+      display: grid;
+      justify-items: center;
+      gap: 13px;
+    }
+
+    .embed-fallback {
+      display: none;
+      width: min(420px, calc(100% - 40px));
+      justify-items: center;
+      text-align: center;
+    }
+
+    .panel.load-slow .loader-inner { display: none; }
+
+    .panel.load-slow .embed-fallback {
+      display: grid;
+      gap: 14px;
+    }
+
+    .fallback-icon {
+      display: grid;
+      width: 48px;
+      height: 48px;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 15px;
+      color: var(--accent);
+      background: rgba(255,255,255,.04);
+    }
+
+    .fallback-icon svg { width: 22px; height: 22px; }
+
+    .fallback-title {
+      margin: 2px 0 0;
+      color: var(--white);
+      font-size: 17px;
+      font-weight: 720;
+      letter-spacing: -.02em;
+    }
+
+    .fallback-copy {
+      max-width: 360px;
+      margin: -6px 0 4px;
+      color: rgba(255,255,255,.57);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .fallback-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 11px;
+      background: var(--accent);
+      color: var(--white);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 760;
+    }
+
+    .spinner {
+      width: 31px;
+      height: 31px;
+      border: 2px solid rgba(255,255,255,.15);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    .loader-label {
+      font-size: 11px;
+      font-weight: 730;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .flight-panel {
+      overflow: hidden;
+      background: #121a16;
+      color: var(--white);
+    }
+
+    .flight-grid {
+      position: absolute;
+      inset: 0;
+      opacity: .22;
+      background-image:
+        linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(90deg, #000, transparent 82%);
+    }
+
+    .radar-art {
+      position: absolute;
+      top: 50%;
+      right: clamp(-170px, -4vw, -50px);
+      width: min(62vw, 740px);
+      aspect-ratio: 1;
+      border: 1px solid rgba(114,212,151,.16);
+      border-radius: 50%;
+      transform: translateY(-50%);
+    }
+
+    .radar-art::before,
+    .radar-art::after {
+      content: "";
+      position: absolute;
+      inset: 17%;
+      border: 1px solid rgba(114,212,151,.18);
+      border-radius: 50%;
+    }
+
+    .radar-art::after { inset: 35%; }
+
+    .radar-line {
+      position: absolute;
+      inset: 50% 0 auto 50%;
+      width: 48%;
+      height: 1px;
+      transform-origin: left center;
+      background: linear-gradient(90deg, rgba(114,212,151,.8), transparent);
+      animation: sweep 5s linear infinite;
+    }
+
+    .radar-sweep {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(from 250deg, transparent 0 75%, rgba(114,212,151,.13) 94%, transparent 100%);
+      animation: sweep 5s linear infinite;
+    }
+
+    @keyframes sweep { to { transform: rotate(360deg); } }
+
+    .plane {
+      position: absolute;
+      top: 31%;
+      left: 42%;
+      color: var(--accent);
+      filter: drop-shadow(0 0 12px rgba(233,102,61,.45));
+      transform: rotate(24deg);
+    }
+
+    .plane svg { width: 29px; height: 29px; }
+
+    .flight-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: min(590px, 62%);
+      height: 100%;
+      padding: clamp(30px, 6vw, 92px);
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 20px;
+      color: #92caa5;
+      font-size: 11px;
+      font-weight: 780;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 1px;
+      background: currentColor;
+    }
+
+    .flight-title {
+      max-width: 520px;
+      margin: 0;
+      font-size: clamp(38px, 5.2vw, 76px);
+      font-weight: 680;
+      letter-spacing: -.055em;
+      line-height: .98;
+    }
+
+    .flight-copy {
+      max-width: 460px;
+      margin: 22px 0 30px;
+      color: rgba(255,255,255,.61);
+      font-size: clamp(14px, 1.4vw, 17px);
+      line-height: 1.58;
+    }
+
+    .primary-link {
+      display: inline-flex;
+      align-items: center;
+      align-self: flex-start;
+      gap: 10px;
+      min-height: 48px;
+      padding: 0 19px;
+      border-radius: 12px;
+      background: var(--accent);
+      color: var(--white);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 760;
+      box-shadow: 0 9px 26px rgba(233,102,61,.2);
+      transition: transform .2s ease, background .2s ease;
+    }
+
+    .primary-link:hover { background: #f2744c; transform: translateY(-2px); }
+    .primary-link:active { transform: translateY(0) scale(.98); }
+    .primary-link svg { width: 17px; height: 17px; }
+
+    .noscript {
+      position: fixed;
+      inset: 20px;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 25px;
+      border-radius: 16px;
+      background: var(--ink);
+      color: var(--white);
+      text-align: center;
+    }
+
+    .header-datetime {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: rgba(255, 255, 255, .48);
+      /* color: var(--muted); */
+      color: #000000;
+      font-size: 12px;
+      font-weight: 650;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    /* .header-datetime strong {
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 780;
+      letter-spacing: .02em;
+    } */
+
+    .header-datetime strong {
+      color: #2d7df6;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: .03em;
+
+      background: linear-gradient(
+        180deg,
+        #72b4ff 0%,
+        #2d7df6 48%,
+        #1556b8 100%
+      );
+
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+
+      filter: drop-shadow(0 1px 1px rgba(45, 125, 246, .24));
+    }
+
+    .datetime-separator {
+      color: rgba(20, 32, 28, .28);
+    }
+
+    @media (max-width: 790px) {
+      :root { --header-height: 68px; --radius: 14px; }
+
+      .shell {
+        grid-template-rows: var(--header-height) minmax(0, 1fr) 76px;
+        padding: 0 10px max(7px, env(safe-area-inset-bottom));
+      }
+
+      .topbar { display: contents; }
+
+      .brand {
+        grid-row: 1;
+        align-self: center;
+        padding: 0 3px;
+      }
+      .brand-mark { width: 36px; height: 36px; border-radius: 11px; }
+      .brand-kicker { display: none; }
+      .brand-title { font-size: 16px; }
+
+      .tabs {
+        grid-row: 3;
+        align-self: end;
+        width: 100%;
+        height: 68px;
+        margin: 8px 0 0;
+        padding: 4px;
+        border-radius: 16px;
+        background: rgba(255,255,255,.62);
+        backdrop-filter: blur(18px);
+      }
+
+      .tab {
+        flex: 1 1 25%;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+        height: 58px;
+        padding: 0 4px;
+        border-radius: 12px;
+        font-size: 10px;
+        letter-spacing: .01em;
+      }
+
+      .tab svg { width: 19px; height: 19px; }
+      .viewer { grid-row: 2; }
+
+      .viewer-source { display: none; }
+      .external-link span { display: none; }
+      .external-link { width: 34px; padding: 0; justify-content: center; }
+
+      .flight-content {
+        justify-content: flex-end;
+        width: 100%;
+        padding: 30px 24px 40px;
+        background: linear-gradient(0deg, rgba(18,26,22,.98) 10%, rgba(18,26,22,.55) 68%, transparent 100%);
+      }
+
+      .flight-title { max-width: 330px; font-size: clamp(39px, 12vw, 58px); }
+      .flight-copy { max-width: 380px; margin: 16px 0 23px; font-size: 14px; }
+      .eyebrow { margin-bottom: 14px; }
+
+      .radar-art {
+        top: 28%;
+        right: -25vw;
+        width: 100vw;
+      }
+
+
+      .header-datetime {
+        grid-row: 1;
+        align-self: center;
+        justify-self: end;
+        gap: 4px;
+        padding: 6px 8px;
+        font-size: 10px;
+      }
+
+      .header-datetime strong {
+        font-size: 12px;
+      }
+
+      .datetime-separator {
+        display: none;
+      }
+
+      .brand img {
+        width: auto !important;
+        height: 40px !important;
+        max-width: 47vw !important;
+      }
+
+    }
+
+    @media (max-width: 390px) {
+      .brand-title { font-size: 15px; }
+      .viewer-head { padding-left: 13px; }
+      .flight-content { padding-inline: 20px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="shell">
+    <header class="topbar">
+
+      <div class="brand" aria-label="Municipalidad de Jesús María">
+        <img
+          src="https://raw.githubusercontent.com/modernizacionmjm/web/refs/heads/main/Logos/LogoDef.png"
+          alt="Municipalidad de Jesús María"
+          style="display:block; width:auto; height:52px; max-width:70vw; object-fit:contain;"
+        >
+      </div>
+
+      <div class="header-datetime" aria-label="Fecha y hora actual">
+        <span id="header-date"></span>
+        <span class="datetime-separator">—</span>
+        <strong id="header-time"></strong>
+      </div>
+
+
+      <nav class="tabs" role="tablist" aria-label="Fuentes de monitoreo">
+        <button class="tab" id="tab-radsat" role="tab" aria-selected="true" aria-controls="panel-radsat" data-view="radsat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M8.6 14.8a5 5 0 0 1 0-7.1M5.8 17.6a9 9 0 0 1 0-12.7" stroke-linecap="round"/>
+            <path d="M14.6 9.4 21 3m-4.8.5 4.3 4.3M9.8 13.2l4.9 1.1 1.1 4.9-3 3-4.2-7.8 1.2-1.2Z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>RadSat</span>
+        </button>
+        <button class="tab" id="tab-temperatura" role="tab" aria-selected="false" aria-controls="panel-temperatura" data-view="temperatura" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M14 14.8V5a4 4 0 0 0-8 0v9.8a6 6 0 1 0 8 0Z" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 7v9m0 0a2.2 2.2 0 1 0 0 4.4A2.2 2.2 0 0 0 10 16Z" stroke-linecap="round"/>
+          </svg>
+          <span>Temperatura</span>
+        </button>
+        <button class="tab" id="tab-sismos" role="tab" aria-selected="false" aria-controls="panel-sismos" data-view="sismos" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M3 13h3l2.1-5 3.2 10 2.5-7 1.8 4H21" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4 5h16M4 21h16" opacity=".45" stroke-linecap="round"/>
+          </svg>
+          <span>Sismos</span>
+        </button>
+      </nav>
+    </header>
+
+    <section class="viewer" aria-live="polite">
+      <div class="viewer-head">
+        <div class="viewer-ident">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span class="viewer-title" id="current-title">RadSat</span>
+          <span class="viewer-source" id="current-source">Imágenes satelitales · Windy</span>
+        </div>
+        <a class="external-link" id="external-link" href="https://www.windy.com/-31.196/-64.012?satellite,-31.196,-64.012,9" target="_blank" rel="noopener noreferrer" aria-label="Abrir RadSat en una nueva pestaña">
+          <span>Abrir fuente</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M14 5h5v5M13 11l6-6M19 14v5H5V5h5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="panels">
+        <section class="panel active" id="panel-radsat" role="tabpanel" aria-labelledby="tab-radsat" data-view="radsat">
+          <div class="loader">
+            <div class="loader-inner" aria-hidden="true"><span class="spinner"></span><span class="loader-label">Cargando satélite</span></div>
+            <div class="embed-fallback">
+              <span class="fallback-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7.5 17.5 17 8m-6-1h7v7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 18H6V6h3" opacity=".6" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+              <p class="fallback-title">El mapa está tardando</p>
+              <p class="fallback-copy">Podés continuar la consulta directamente en Windy.</p>
+              <a class="fallback-link" href="https://www.windy.com/-31.196/-64.012?satellite,-31.196,-64.012,9" target="_blank" rel="noopener noreferrer">Abrir mapa satelital</a>
+            </div>
+          </div>
+          <iframe
+            title="Mapa satelital y radar de Windy"
+            data-src="https://embed.windy.com/embed.html?type=map&amp;location=coordinates&amp;metricRain=mm&amp;metricTemp=default&amp;metricWind=default&amp;zoom=9&amp;overlay=satellite&amp;product=satellite&amp;level=surface&amp;lat=-31.196&amp;lon=-64.012"
+            allowfullscreen
+            loading="eager"
+            referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        </section>
+
+        <section class="panel" id="panel-temperatura" role="tabpanel" aria-labelledby="tab-temperatura" data-view="temperatura" hidden>
+          <div class="loader">
+            <div class="loader-inner" aria-hidden="true"><span class="spinner"></span><span class="loader-label">Cargando temperatura</span></div>
+            <div class="embed-fallback">
+              <span class="fallback-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7.5 17.5 17 8m-6-1h7v7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 18H6V6h3" opacity=".6" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+              <p class="fallback-title">El mapa está tardando</p>
+              <p class="fallback-copy">Podés continuar la consulta directamente en Windy.</p>
+              <a class="fallback-link" href="https://www.windy.com/-31.036/-64.124?temp,-31.036,-64.124,10" target="_blank" rel="noopener noreferrer">Abrir temperatura</a>
+            </div>
+          </div>
+          <iframe
+            title="Mapa de temperatura de Windy"
+            data-src="https://embed.windy.com/embed2.html?lat=-31.036&amp;lon=-64.124&amp;detailLat=-31.015&amp;detailLon=-64.072&amp;width=650&amp;height=450&amp;zoom=10&amp;level=surface&amp;overlay=temp&amp;product=ecmwf&amp;menu=&amp;message=&amp;marker=&amp;calendar=now&amp;pressure=&amp;type=map&amp;location=coordinates&amp;detail=&amp;metricWind=default&amp;metricTemp=default&amp;radarRange=-1"
+            allowfullscreen
+            loading="lazy"
+            referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        </section>
+
+        <section class="panel" id="panel-sismos" role="tabpanel" aria-labelledby="tab-sismos" data-view="sismos" hidden>
+          <div class="loader">
+            <div class="loader-inner" aria-hidden="true"><span class="spinner"></span><span class="loader-label">Cargando INPRES</span></div>
+            <div class="embed-fallback">
+              <span class="fallback-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7.5 17.5 17 8m-6-1h7v7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 18H6V6h3" opacity=".6" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+              <p class="fallback-title">INPRES no respondió dentro del visor</p>
+              <p class="fallback-copy">Abrí la fuente oficial para consultar los últimos registros sísmicos.</p>
+              <a class="fallback-link" href="https://www.inpres.gob.ar/desktop/" target="_blank" rel="noopener noreferrer">Abrir INPRES</a>
+            </div>
+          </div>
+          <iframe
+            title="Últimos sismos informados por INPRES"
+            data-src="https://www.inpres.gob.ar/desktop/"
+            loading="lazy"
+            referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        </section>
+
+        <section class="panel flight-panel loaded" id="panel-vuelos" role="tabpanel" aria-labelledby="tab-vuelos" data-view="vuelos" hidden>
+          <div class="flight-grid" aria-hidden="true"></div>
+          <div class="radar-art" aria-hidden="true">
+            <span class="radar-sweep"></span>
+            <span class="radar-line"></span>
+            <span class="plane">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="m21.5 16.2-8.3-2.5V20l-2.7 1.7-1.4-8.9L3 10.9V8.7l6.1.2L10.5 3 13 4.4l.2 5.2 8.3 2.5v4.1Z"/></svg>
+            </span>
+          </div>
+          <div class="flight-content">
+            <p class="eyebrow">Tránsito aéreo en vivo</p>
+            <h2 class="flight-title">El cielo, en tiempo real.</h2>
+            <p class="flight-copy">FlightRadar24 no permite mostrar su mapa dentro de otros sitios. Abrilo de forma segura para consultar vuelos sobre la región.</p>
+            <a class="primary-link" href="https://www.flightradar24.com/-32.38,-61.81/6" target="_blank" rel="noopener noreferrer">
+              Ver mapa de vuelos
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="M6 12h12m-4-4 4 4-4 4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <noscript><div class="noscript">Este monitor necesita JavaScript habilitado para cambiar entre las cuatro vistas.</div></noscript>
+
+  <script>
+    (() => {
+      const views = {
+        radsat: {
+          title: 'RadSat',
+          source: 'Imágenes satelitales · Windy',
+          url: 'https://www.windy.com/-31.196/-64.012?satellite,-31.196,-64.012,9'
+        },
+        temperatura: {
+          title: 'Temperatura',
+          source: 'Modelo ECMWF · Windy',
+          url: 'https://www.windy.com/-31.036/-64.124?temp,-31.036,-64.124,10'
+        },
+        sismos: {
+          title: 'Sismos',
+          source: 'Últimos registros · INPRES',
+          url: 'https://www.inpres.gob.ar/desktop/'
+        },
+        vuelos: {
+          title: 'Vuelos',
+          source: 'Tránsito aéreo · FlightRadar24',
+          url: 'https://www.flightradar24.com/-32.38,-61.81/6'
+        }
+      };
+
+      const tabs = [...document.querySelectorAll('[role="tab"]')];
+      const panels = [...document.querySelectorAll('[role="tabpanel"]')];
+      const currentTitle = document.getElementById('current-title');
+      const currentSource = document.getElementById('current-source');
+      const externalLink = document.getElementById('external-link');
+
+      const headerDate = document.getElementById('header-date');
+      const headerTime = document.getElementById('header-time');
+
+      function actualizarFechaHora() {
+        const ahora = new Date();
+        const pad = (numero) => String(numero).padStart(2, '0');
+
+        const fecha = [
+          pad(ahora.getDate()),
+          pad(ahora.getMonth() + 1),
+          ahora.getFullYear()
+        ].join('/');
+
+        const hora = [
+          pad(ahora.getHours()),
+          pad(ahora.getMinutes()),
+          pad(ahora.getSeconds())
+        ].join(':');
+
+        headerDate.textContent = fecha;
+        headerTime.textContent = hora;
+      }
+
+      actualizarFechaHora();
+      window.setInterval(actualizarFechaHora, 1000);
+
+
+      function loadPanel(panel) {
+        const frame = panel.querySelector('iframe[data-src]');
+        if (!frame || frame.src) return;
+        frame.addEventListener('load', () => {
+          panel.classList.remove('load-slow');
+          panel.classList.add('loaded');
+        }, { once: true });
+        frame.src = frame.dataset.src;
+        window.setTimeout(() => {
+          if (!panel.classList.contains('loaded')) panel.classList.add('load-slow');
+        }, 12000);
+      }
+
+      function selectView(name, updateHash = true) {
+        const view = views[name] || views.radsat;
+
+        tabs.forEach((tab) => {
+          const selected = tab.dataset.view === name;
+          tab.setAttribute('aria-selected', String(selected));
+          tab.tabIndex = selected ? 0 : -1;
+        });
+
+        panels.forEach((panel) => {
+          const selected = panel.dataset.view === name;
+          panel.hidden = !selected;
+          panel.classList.toggle('active', selected);
+          if (selected) loadPanel(panel);
+        });
+
+        currentTitle.textContent = view.title;
+        currentSource.textContent = view.source;
+        externalLink.href = view.url;
+        externalLink.setAttribute('aria-label', `Abrir ${view.title} en una nueva pestaña`);
+
+        if (updateHash && location.hash !== `#${name}`) {
+          history.replaceState(null, '', `#${name}`);
+        }
+      }
+
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => selectView(tab.dataset.view));
+        tab.addEventListener('keydown', (event) => {
+          if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+          event.preventDefault();
+          let next = index;
+          if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+          if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+          if (event.key === 'Home') next = 0;
+          if (event.key === 'End') next = tabs.length - 1;
+          tabs[next].focus();
+          selectView(tabs[next].dataset.view);
+        });
+      });
+
+      window.addEventListener('hashchange', () => {
+        const name = location.hash.slice(1);
+        if (views[name]) selectView(name, false);
+      });
+
+      const initial = location.hash.slice(1);
+      selectView(views[initial] ? initial : 'radsat', false);
+    })();
+  </script>
+</body>
+</html>
