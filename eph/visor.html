@@ -1,0 +1,1549 @@
+d<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0c2f4d" />
+  <title>Encuesta Permanente de Hogares | Municipalidad de Jesús María</title>
+
+  <link rel="icon" href="https://raw.githubusercontent.com/modernizacionmjm/web/refs/heads/main/Logos/favicon.ico">
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <!-- Flatpickr -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+  <style>
+    :root {
+      --navy: #082b46;
+      --navy-2: #0d3d60;
+      --blue: #1977ba;
+      --cyan: #65c2e8;
+      --ink: #102536;
+      --muted: #647684;
+      --bg: #f3f7fa;
+      --card: rgba(255,255,255,.94);
+      --line: rgba(14, 56, 84, .12);
+      --shadow: 0 18px 55px rgba(9, 44, 69, .12);
+      --red: #e53935;
+      --orange: #f59e0b;
+      --green: #27a85c;
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 15px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 3%, rgba(101, 194, 232, .18), transparent 30%),
+        radial-gradient(circle at 92% 13%, rgba(25, 119, 186, .10), transparent 33%),
+        linear-gradient(180deg, #edf5f9 0%, #f8fafc 42%, #f2f6f8 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .22;
+      background-image:
+        linear-gradient(rgba(255,255,255,.45) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.45) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 58%);
+      z-index: -1;
+    }
+
+    .page-shell {
+      width: min(1420px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 42px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-xl);
+      min-height: 190px;
+      padding: 32px 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+      color: white;
+      background:
+        linear-gradient(118deg, rgba(5,35,58,.97), rgba(13,61,96,.96) 55%, rgba(25,119,186,.92)),
+        radial-gradient(circle at 85% 30%, rgba(101,194,232,.42), transparent 32%);
+      box-shadow: 0 22px 68px rgba(8,43,70,.24);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 420px;
+      height: 420px;
+      right: -120px;
+      top: -170px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.13);
+      box-shadow: 0 0 0 60px rgba(255,255,255,.035), 0 0 0 120px rgba(255,255,255,.018);
+    }
+
+    .hero-copy { position: relative; z-index: 1; max-width: 820px; }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: #bde8f9;
+      margin-bottom: 10px;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #79ddff;
+      box-shadow: 0 0 0 6px rgba(121,221,255,.12);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4.4vw, 3.9rem);
+      line-height: 1;
+      letter-spacing: -.045em;
+      /* font-weight: 850; */
+      font-weight: 500;
+    }
+    .hero p {
+      margin: 15px 0 0;
+      max-width: 700px;
+      color: rgba(255,255,255,.79);
+      font-size: 1rem;
+      line-height: 1.58;
+    }
+
+    .brand-box {
+      position: relative;
+      z-index: 1;
+      flex: 0 0 auto;
+      width: min(290px, 34vw);
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 22px;
+      background: rgba(255,255,255,.95);
+      box-shadow: 0 18px 45px rgba(0,0,0,.14);
+      backdrop-filter: blur(8px);
+    }
+    .brand-box img { display: block; width: 100%; height: auto; }
+
+    .panel {
+      margin-top: 22px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .panel-title { 
+      margin: 0; 
+      font-size: 1.25rem; 
+      /* font-weight: 850;  */
+      font-weight: 500; 
+      letter-spacing: -.02em; 
+    }
+    
+    .panel-subtitle { margin: 4px 0 0; color: var(--muted); font-size: .91rem; }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: #eef7fc;
+      border: 1px solid #d4eaf5;
+      color: #276687;
+      font-size: .81rem;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #28a96b;
+      box-shadow: 0 0 0 5px rgba(40,169,107,.10);
+    }
+    .status-pill.loading .status-dot { background: #f59e0b; }
+    .status-pill.error .status-dot { background: #e53935; }
+
+    .quick-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 11px;
+      margin-bottom: 20px;
+    }
+
+    .shine-btn {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      min-height: 44px;
+      font: inherit;
+      font-size: .91rem;
+      /* font-weight: 800; */
+      font-weight: 400;
+      letter-spacing: .005em;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(135deg, var(--navy-2), var(--blue));
+      box-shadow: 0 10px 23px rgba(25,119,186,.20), inset 0 1px 0 rgba(255,255,255,.20);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    .shine-btn::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      top: -30%;
+      left: -60%;
+      width: 42%;
+      height: 160%;
+      transform: skewX(-23deg);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+      animation: shine 3.3s ease-in-out infinite;
+    }
+    .shine-btn:nth-child(2)::before { animation-delay: .45s; }
+    .shine-btn:nth-child(3)::before { animation-delay: .9s; }
+    .shine-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(25,119,186,.28); }
+    .shine-btn:active { transform: translateY(0); }
+    .shine-btn.active {
+      background: linear-gradient(135deg, #071f33, #0d517e);
+      box-shadow: 0 0 0 3px rgba(101,194,232,.18), 0 12px 25px rgba(8,43,70,.22);
+    }
+    .shine-btn.secondary {
+      background: linear-gradient(135deg, #eef5f8, #ffffff);
+      color: var(--navy-2);
+      border: 1px solid #d7e4eb;
+      box-shadow: 0 8px 20px rgba(8,43,70,.08), inset 0 1px 0 rgba(255,255,255,.9);
+    }
+    .shine-btn.secondary::before { background: linear-gradient(90deg, transparent, rgba(25,119,186,.17), transparent); }
+    .shine-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    @keyframes shine {
+      0%, 32% { left: -60%; }
+      63%, 100% { left: 125%; }
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) auto;
+      gap: 14px;
+      align-items: end;
+    }
+
+    .field label {
+      display: block;
+      margin: 0 0 8px 2px;
+      color: #345366;
+      font-size: .79rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .055em;
+    }
+    .date-wrap { position: relative; }
+    .date-wrap::after {
+      content: "▣";
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #4d7590;
+      font-size: 13px;
+      pointer-events: none;
+    }
+    .date-input {
+      width: 100%;
+      min-height: 47px;
+      padding: 0 43px 0 15px;
+      border: 1px solid #cadbe5;
+      border-radius: 14px;
+      background: #fff;
+      color: #19394d;
+      font: inherit;
+      font-weight: 700;
+      outline: none;
+      box-shadow: inset 0 1px 2px rgba(8,43,70,.03);
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+    .date-input:focus {
+      border-color: #5aaed8;
+      box-shadow: 0 0 0 4px rgba(90,174,216,.13);
+    }
+
+    .range-hint {
+      margin-top: 13px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f5f9fb;
+      border: 1px solid #e0ebf1;
+      color: #627784;
+      font-size: .83rem;
+    }
+
+    .map-card {
+      margin-top: 22px;
+      padding: 14px;
+      border-radius: var(--radius-xl);
+      background: rgba(255,255,255,.96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .map-topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 8px 8px 14px;
+    }
+    .map-topline strong { font-size: 1rem; }
+    .map-meta { color: var(--muted); font-size: .86rem; }
+
+    .map-title-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .active-filter-label {
+      color: #0303fc;
+      font-size: .86rem;
+      font-weight: 500;
+    }
+
+
+    #map {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: min(67vh, 720px);
+      min-height: 480px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #dae4ea;
+      border: 1px solid #d3e0e7;
+    }
+
+    .map-legend {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      z-index: 700;
+      min-width: 210px;
+      padding: 13px 14px;
+      border-radius: 14px;
+      color: #18384c;
+      background: rgba(255,255,255,.94);
+      border: 1px solid rgba(13,61,96,.13);
+      box-shadow: 0 10px 28px rgba(8,43,70,.16);
+      backdrop-filter: blur(10px);
+    }
+    .legend-title { font-size: .77rem; font-weight: 850; text-transform: uppercase; letter-spacing: .055em; margin-bottom: 9px; color: #45677b; }
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 7px 0;
+      font-size: .82rem;
+      font-weight: 700;
+      user-select: none;
+    }
+    .legend-toggle {
+      width: 15px;
+      height: 15px;
+      margin: 0;
+      flex: 0 0 auto;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+    .legend-dot { width: 11px; height: 11px; border-radius: 50%; border: 2px solid rgba(255,255,255,.9); box-shadow: 0 0 0 1px rgba(10,44,67,.18); flex: 0 0 auto; }
+    .legend-zoom {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #18384c;
+      font: inherit;
+      font-weight: 750;
+      text-align: left;
+      cursor: pointer;
+      border-bottom: 1px dashed transparent;
+      transition: color .16s ease, border-color .16s ease;
+    }
+    .legend-zoom:hover,
+    .legend-zoom:focus-visible {
+      color: var(--blue);
+      border-bottom-color: currentColor;
+      outline: none;
+    }
+    .legend-zoom:disabled {
+      color: #9aa9b2;
+      cursor: default;
+      border-bottom-color: transparent;
+    }
+
+    .download-row {
+      display: flex;
+      justify-content: flex-end;
+      padding: 15px 5px 2px;
+    }
+
+    .leaflet-control-layers {
+      border: 1px solid rgba(13,61,96,.16) !important;
+      border-radius: 14px !important;
+      box-shadow: 0 10px 28px rgba(8,43,70,.16) !important;
+      overflow: hidden;
+    }
+    .leaflet-control-layers-expanded {
+      padding: 12px 14px !important;
+      min-width: 182px;
+      color: #19394d;
+    }
+    .leaflet-control-layers label { margin: 6px 0; font-weight: 700; }
+    .layers-separator {
+      border: 0;
+      border-top: 1px solid #d9e5eb;
+      margin: 10px 0;
+    }
+
+    .leaflet-popup-content-wrapper {
+      border-radius: 14px;
+      box-shadow: 0 12px 32px rgba(8,43,70,.20);
+    }
+    .leaflet-popup-content { margin: 12px 15px; color: #18384c; font-weight: 700; line-height: 1.55; }
+
+    .custom-marker {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 2px 7px rgba(0,0,0,.35);
+    }
+
+    .empty-state {
+      position: absolute;
+      inset: 50% auto auto 50%;
+      transform: translate(-50%, -50%);
+      z-index: 500;
+      min-width: min(460px, 84%);
+      padding: 18px 20px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.95);
+      border: 1px solid rgba(13,61,96,.13);
+      box-shadow: 0 13px 35px rgba(8,43,70,.15);
+      text-align: center;
+      color: #526f81;
+      font-weight: 700;
+      display: none;
+    }
+
+    .export-clone {
+      position: fixed;
+      left: -99999px;
+      top: 0;
+      width: 1400px;
+      padding: 26px;
+      background: #f4f7f9;
+      font-family: inherit;
+      z-index: -9999;
+    }
+    .export-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+      margin-bottom: 16px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: #082b46;
+      color: #fff;
+    }
+    .export-header img { width: 260px; background: white; padding: 10px; border-radius: 12px; }
+    .export-header h2 { margin: 0 0 7px; font-size: 26px; }
+    .export-header p { margin: 0; opacity: .85; font-size: 14px; }
+    .export-info {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 22px;
+      padding: 15px 18px;
+      border: 1px solid #d8e4ea;
+      border-radius: 15px;
+      background: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      color: #315267;
+    }
+    .export-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 15px; }
+    .export-legend span { display: inline-flex; align-items: center; gap: 7px; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 99999;
+      transform: translate(-50%, 22px);
+      opacity: 0;
+      pointer-events: none;
+      padding: 12px 16px;
+      border-radius: 999px;
+      color: white;
+      background: #082b46;
+      box-shadow: 0 15px 35px rgba(8,43,70,.25);
+      font-weight: 750;
+      font-size: .87rem;
+      transition: all .24s ease;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99990;
+      display: none;
+      place-items: center;
+      background: rgba(4, 25, 40, .36);
+      backdrop-filter: blur(4px);
+    }
+    .loading-overlay.show { display: grid; }
+    .loader-card {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 15px 18px;
+      border-radius: 16px;
+      background: white;
+      color: #20465d;
+      box-shadow: 0 18px 48px rgba(0,0,0,.20);
+      font-weight: 800;
+    }
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid #d7e8f1;
+      border-top-color: #1977ba;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 900px) {
+      .hero { align-items: flex-start; padding: 26px; }
+      .brand-box { width: 220px; }
+      .filter-grid { grid-template-columns: 1fr 1fr; }
+      .filter-grid .filter-action { grid-column: 1 / -1; }
+      .filter-action .shine-btn { width: 100%; }
+    }
+
+    @media (max-width: 690px) {
+      .page-shell { width: min(100% - 18px, 1420px); padding-top: 9px; }
+      .hero { border-radius: 22px; flex-direction: column-reverse; min-height: 0; }
+      .brand-box { width: min(240px, 76vw); padding: 14px; }
+      h1 { font-size: clamp(2rem, 11vw, 3.15rem); }
+      .panel { padding: 18px; border-radius: 22px; }
+      .panel-head { align-items: flex-start; flex-direction: column; }
+      .filter-grid { grid-template-columns: 1fr; }
+      .filter-grid .filter-action { grid-column: auto; }
+      #map { min-height: 500px; height: 68vh; border-radius: 16px; }
+      .map-card { padding: 9px; border-radius: 22px; }
+      .map-topline { align-items: flex-start; flex-direction: column; }
+      .map-legend { left: 10px; bottom: 10px; min-width: 190px; max-width: calc(100% - 20px); }
+      .download-row .shine-btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">Seguimiento territorial</div>
+        <h1>Encuesta Permanente de Hogares</h1>
+        <p>Visualización geográfica de los registros realizados por los encuestadores, con filtros temporales y referencia cronológica por colores.</p>
+      </div>
+      <div class="brand-box">
+        <img src="https://raw.githubusercontent.com/modernizacionmjm/web/refs/heads/main/Logos/LogoDef.png" alt="Municipalidad de Jesús María">
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">Filtrar registros</h2>
+          <p class="panel-subtitle">Elegí un acceso rápido o definí un período usando únicamente fechas existentes.</p>
+        </div>
+        <div class="status-pill loading" id="statusPill">
+          <span class="status-dot"></span>
+          <span id="statusText">Cargando datos…</span>
+        </div>
+      </div>
+
+      <div class="quick-buttons">
+        <button class="shine-btn" id="btnMonth" type="button">Mes en curso</button>
+        <button class="shine-btn" id="btnYear" type="button">Año en curso</button>
+        <button class="shine-btn active" id="btnAll" type="button">Todos</button>
+      </div>
+
+      <div class="filter-grid">
+        <div class="field">
+          <label for="dateFrom">Desde</label>
+          <div class="date-wrap">
+            <input id="dateFrom" class="date-input" type="text" placeholder="dd/mm/aaaa" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="dateTo">Hasta</label>
+          <div class="date-wrap">
+            <input id="dateTo" class="date-input" type="text" placeholder="dd/mm/aaaa" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="filter-action">
+          <button class="shine-btn" id="btnFilter" type="button">Filtrar</button>
+        </div>
+      </div>
+
+      <div class="range-hint" id="rangeHint">Detectando fechas disponibles en el Google Sheet…</div>
+    </section>
+
+    <section class="map-card">
+
+      <!-- <div class="map-topline">
+        <strong>Ubicación de encuestas</strong>
+        <span class="map-meta" id="mapMeta">Sin registros cargados</span>
+      </div> -->
+
+      <div class="map-topline">
+        <div class="map-title-row">
+          <strong>Ubicación de encuestas</strong>
+          <span class="active-filter-label" id="activeFilterLabel"></span>
+        </div>
+
+        <span class="map-meta" id="mapMeta">Sin registros cargados</span>
+      </div>
+
+
+      <div id="map">
+        <div class="empty-state" id="emptyState">No hay registros para el período seleccionado.</div>
+      </div>
+
+      <div class="download-row">
+        <!-- <button class="shine-btn secondary" id="btnDownload" type="button">Descargar PNG</button> -->
+        <button class="shine-btn" id="btnDownload" type="button">Descargar PNG</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader-card"><span class="spinner"></span><span id="loadingText">Preparando imagen…</span></div>
+  </div>
+
+  <!-- Leaflet -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Flatpickr -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+
+  <!-- html2canvas -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <script>
+    //const GVIZ_URL = 'https://docs.google.com/spreadsheets/d/1KzQbuWy_p3DdwFMQCigKpGx50gVp4--JVxYTcvxrO2I/gviz/tq?tq=select%20AP%2CAR&tqx=out:json&sheet=BloqueAyB';
+    const GVIZ_URL = 'https://eph-a.modernizacionjesusmaria.workers.dev/datos';
+
+    const COLORS = {
+      latest: '#e53935',
+      recent: '#f59e0b',
+      older: '#27a85c'
+    };
+
+    let allRecords = [];
+    let filteredRecords = [];
+    let existingDateKeys = new Set();
+    let dateFromPicker = null;
+    let dateToPicker = null;
+    let currentQuickFilter = 'all';
+    const categoryVisibility = {
+      latest: true,
+      recent: true,
+      older: true
+    };
+    const categoryMarkers = {
+      latest: [],
+      recent: [],
+      older: []
+    };
+    const categoryCoords = {
+      latest: [],
+      recent: [],
+      older: []
+    };
+
+    const statusPill = document.getElementById('statusPill');
+    const statusText = document.getElementById('statusText');
+    const rangeHint = document.getElementById('rangeHint');
+    const mapMeta = document.getElementById('mapMeta');
+    const emptyState = document.getElementById('emptyState');
+    const activeFilterLabel = document.getElementById('activeFilterLabel');
+    const toast = document.getElementById('toast');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingText = document.getElementById('loadingText');
+
+    const btnMonth = document.getElementById('btnMonth');
+    const btnYear = document.getElementById('btnYear');
+    const btnAll = document.getElementById('btnAll');
+    const btnFilter = document.getElementById('btnFilter');
+    const btnDownload = document.getElementById('btnDownload');
+
+    const map = L.map('map', {
+      zoomControl: true,
+      preferCanvas: true
+    }).setView([-30.983814, -64.097716], 14);
+
+
+    map.createPane('olderPane');
+    map.getPane('olderPane').style.zIndex = 410;
+
+    map.createPane('recentPane');
+    map.getPane('recentPane').style.zIndex = 420;
+
+    map.createPane('latestPane');
+    map.getPane('latestPane').style.zIndex = 430;
+
+
+    const googleSat = L.tileLayer(
+      'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+      { maxZoom: 22, crossOrigin: true, attribution: '&copy; Google' }
+    );
+
+    const osm = L.tileLayer(
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      { maxZoom: 19, crossOrigin: true, attribution: '&copy; OpenStreetMap contributors' }
+    ).addTo(map);
+
+    const pointsLayer = L.layerGroup().addTo(map);
+
+    const layerControl = L.control.layers(
+      {
+        'Google Satellite': googleSat,
+        'OpenStreetMap': osm
+      },
+      {
+        'Puntos de la encuesta': pointsLayer
+      },
+      { collapsed: false, position: 'topright' }
+    ).addTo(map);
+
+    addLayerControlSeparator();
+    addLegend();
+    setTimeout(() => map.invalidateSize(true), 150);
+
+    function addLayerControlSeparator() {
+      requestAnimationFrame(() => {
+        const container = layerControl.getContainer();
+        const overlays = container?.querySelector('.leaflet-control-layers-overlays');
+        if (overlays && !container.querySelector('.layers-separator')) {
+          const hr = document.createElement('hr');
+          hr.className = 'layers-separator';
+          overlays.parentNode.insertBefore(hr, overlays);
+        }
+      });
+    }
+
+    function addLegend() {
+      const legend = L.control({ position: 'bottomleft' });
+      legend.onAdd = function() {
+        const div = L.DomUtil.create('div', 'map-legend');
+        div.innerHTML = `
+          <div class="legend-title">Referencias</div>
+          <div class="legend-row">
+            <input class="legend-toggle" id="toggleLatest" type="checkbox" checked aria-label="Mostrar última encuesta">
+            <span class="legend-dot" style="background:${COLORS.latest}"></span>
+            <button class="legend-zoom" id="zoomLatest" type="button">Última encuesta</button>
+          </div>
+          <div class="legend-row">
+            <input class="legend-toggle" id="toggleRecent" type="checkbox" checked aria-label="Mostrar 9 anteriores">
+            <span class="legend-dot" style="background:${COLORS.recent}"></span>
+            <button class="legend-zoom" id="zoomRecent" type="button">9 anteriores</button>
+          </div>
+          <div class="legend-row">
+            <input class="legend-toggle" id="toggleOlder" type="checkbox" checked aria-label="Mostrar registros anteriores">
+            <span class="legend-dot" style="background:${COLORS.older}"></span>
+            <button class="legend-zoom" id="zoomOlder" type="button">Todas las demás</button>
+          </div>
+        `;
+
+        L.DomEvent.disableClickPropagation(div);
+        L.DomEvent.disableScrollPropagation(div);
+
+        requestAnimationFrame(() => bindLegendEvents(div));
+        return div;
+      };
+      legend.addTo(map);
+    }
+
+    function bindLegendEvents(container) {
+      const bindings = [
+        ['toggleLatest', 'latest'],
+        ['toggleRecent', 'recent'],
+        ['toggleOlder', 'older']
+      ];
+
+      bindings.forEach(([id, category]) => {
+        const checkbox = container.querySelector(`#${id}`);
+        if (!checkbox) return;
+        checkbox.checked = categoryVisibility[category];
+        checkbox.addEventListener('change', () => {
+          categoryVisibility[category] = checkbox.checked;
+          applyCategoryVisibility();
+        });
+      });
+
+      const zoomBindings = [
+        ['zoomLatest', 'latest'],
+        ['zoomRecent', 'recent'],
+        ['zoomOlder', 'older']
+      ];
+
+      zoomBindings.forEach(([id, category]) => {
+        const button = container.querySelector(`#${id}`);
+        if (!button) return;
+        button.addEventListener('click', () => zoomToCategory(category));
+      });
+
+      updateLegendAvailability();
+    }
+
+    function parseDateTime(raw) {
+      if (raw === undefined || raw === null || raw === '') return null;
+      const text = String(raw).trim();
+
+      // Formato esperado del Sheet: 04-06-2026_11:34
+      let match = text.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})[ _T](\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+      if (match) {
+        const [, dd, mm, yyyy, hh, min, ss = '00'] = match;
+        const date = new Date(Number(yyyy), Number(mm) - 1, Number(dd), Number(hh), Number(min), Number(ss));
+        return Number.isNaN(date.getTime()) ? null : date;
+      }
+
+      // GViz muchas veces devuelve fechas como Date(2026,5,4,11,34,0).
+      match = text.match(/^Date\((\d{4}),(\d{1,2}),(\d{1,2})(?:,(\d{1,2}),(\d{1,2})(?:,(\d{1,2}))?)?\)$/);
+      if (match) {
+        const [, yyyy, monthZeroBased, dd, hh = '0', min = '0', ss = '0'] = match;
+        const date = new Date(Number(yyyy), Number(monthZeroBased), Number(dd), Number(hh), Number(min), Number(ss));
+        return Number.isNaN(date.getTime()) ? null : date;
+      }
+
+      return null;
+    }
+
+    function parseDateCell(cell) {
+      if (!cell) return null;
+      // Primero intentamos el valor formateado visible; después el valor crudo de GViz.
+      return parseDateTime(cell.f) || parseDateTime(cell.v);
+    }
+
+    function parseCoords(raw) {
+      if (!raw) return null;
+      const parts = String(raw).split(',').map(v => Number(v.trim()));
+      if (parts.length !== 2 || !Number.isFinite(parts[0]) || !Number.isFinite(parts[1])) return null;
+      const [lat, lng] = parts;
+      if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+      return { lat, lng };
+    }
+
+    function dateKey(date) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    function startOfDay(date) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+    }
+
+    function endOfDay(date) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+    }
+
+    function formatDate(date) {
+      return new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
+    }
+
+    function formatTime(date) {
+      return new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }).format(date);
+    }
+
+    function dayInitial(date) {
+      return ['D.', 'L.', 'M.', 'X.', 'J.', 'V.', 'S.'][date.getDay()];
+    }
+
+    function formatDateWithDay(date) {
+      return `${dayInitial(date)}${formatDate(date)}`;
+    }
+
+    function extractGvizJson(text) {
+      const start = text.indexOf('(');
+      const end = text.lastIndexOf(')');
+      if (start === -1 || end === -1 || end <= start) {
+        throw new Error('Formato de respuesta GViz no reconocido.');
+      }
+      return JSON.parse(text.slice(start + 1, end));
+    }
+
+    function cellValue(cell) {
+      if (!cell) return '';
+      if (cell.f !== undefined && cell.f !== null) return cell.f;
+      if (cell.v !== undefined && cell.v !== null) return cell.v;
+      return '';
+    }
+
+    async function loadData() {
+      setStatus('loading', 'Cargando datos…');
+      btnFilter.disabled = true;
+      btnDownload.disabled = true;
+
+      try {
+        // const res = await fetch(`${GVIZ_URL}&_=${Date.now()}`, { cache: 'no-store' });
+        const res = await fetch(`${GVIZ_URL}?_=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const text = await res.text();
+        const json = extractGvizJson(text);
+        const rows = json?.table?.rows || [];
+
+        allRecords = rows
+          .map((row, index) => {
+            const coordsCell = row.c?.[0];
+            const dateCell = row.c?.[1];
+            const coordsRaw = cellValue(coordsCell);
+            const dateRaw = cellValue(dateCell);
+            const coords = parseCoords(coordsRaw);
+            const date = parseDateCell(dateCell);
+            if (!coords || !date) return null;
+            return { id: index, ...coords, date, coordsRaw, dateRaw };
+          })
+          .filter(Boolean)
+          .sort((a, b) => a.date - b.date);
+
+        if (!allRecords.length) {
+          throw new Error('No se encontraron filas válidas con coordenadas y fecha/hora.');
+        }
+
+        existingDateKeys = new Set(allRecords.map(r => dateKey(r.date)));
+        setupDatePickers();
+
+        const first = allRecords[0].date;
+        const last = allRecords[allRecords.length - 1].date;
+        rangeHint.textContent = `Fechas disponibles: ${formatDate(first)} a ${formatDate(last)} · ${allRecords.length} registros válidos.`;
+
+        // setQuickFilter('all');
+        setInitialFilter();
+
+        setStatus('ok', `${allRecords.length} registros cargados`);
+        btnFilter.disabled = false;
+        btnDownload.disabled = false;
+      } catch (error) {
+        console.error(error);
+        setStatus('error', 'No se pudieron cargar los datos');
+        rangeHint.textContent = 'Verificá worker.';
+        emptyState.style.display = 'block';
+        emptyState.textContent = 'No fue posible cargar los registros desde Google Sheets.';
+      }
+    }
+
+    function setupDatePickers() {
+      if (dateFromPicker) dateFromPicker.destroy();
+      if (dateToPicker) dateToPicker.destroy();
+
+      const enabledDates = [...existingDateKeys].map(k => new Date(`${k}T12:00:00`));
+      const common = {
+        locale: flatpickr.l10ns.es,
+        dateFormat: 'd/m/Y',
+        allowInput: false,
+        disableMobile: true,
+        enable: enabledDates,
+        monthSelectorType: 'static'
+      };
+
+      dateFromPicker = flatpickr('#dateFrom', {
+        ...common,
+        onChange: function(selectedDates) {
+          if (!selectedDates[0] || !dateToPicker) return;
+          const from = selectedDates[0];
+          const allowedTo = [...existingDateKeys]
+            .map(k => new Date(`${k}T12:00:00`))
+            .filter(d => d >= startOfDay(from));
+          dateToPicker.set('enable', allowedTo);
+        }
+      });
+
+      dateToPicker = flatpickr('#dateTo', {
+        ...common,
+        onChange: function(selectedDates) {
+          if (!selectedDates[0] || !dateFromPicker) return;
+          const to = selectedDates[0];
+          const allowedFrom = [...existingDateKeys]
+            .map(k => new Date(`${k}T12:00:00`))
+            .filter(d => d <= endOfDay(to));
+          dateFromPicker.set('enable', allowedFrom);
+        }
+      });
+    }
+
+    function resetPickerEnabledDates() {
+      const enabledDates = [...existingDateKeys].map(k => new Date(`${k}T12:00:00`));
+      dateFromPicker?.set('enable', enabledDates);
+      dateToPicker?.set('enable', enabledDates);
+    }
+
+    function setStatus(type, text) {
+      statusPill.classList.remove('loading', 'error');
+      if (type === 'loading') statusPill.classList.add('loading');
+      if (type === 'error') statusPill.classList.add('error');
+      statusText.textContent = text;
+    }
+
+    function setActiveQuickButton(type) {
+      [btnMonth, btnYear, btnAll].forEach(btn => btn.classList.remove('active'));
+      if (type === 'month') btnMonth.classList.add('active');
+      if (type === 'year') btnYear.classList.add('active');
+      if (type === 'all') btnAll.classList.add('active');
+    }
+
+    function setQuickFilter(type) {
+      if (!allRecords.length) return;
+      currentQuickFilter = type;
+      setActiveQuickButton(type);
+      resetPickerEnabledDates();
+
+      const now = new Date();
+      let subset = [];
+
+      if (type === 'month') {
+        subset = allRecords.filter(r => r.date.getFullYear() === now.getFullYear() && r.date.getMonth() === now.getMonth());
+      } else if (type === 'year') {
+        subset = allRecords.filter(r => r.date.getFullYear() === now.getFullYear());
+      } else {
+        subset = [...allRecords];
+      }
+
+      if (subset.length) {
+        const min = subset[0].date;
+        const max = subset[subset.length - 1].date;
+        dateFromPicker.setDate(min, false);
+        dateToPicker.setDate(max, false);
+        applyFilter(min, max);
+      } else {
+        dateFromPicker.clear();
+        dateToPicker.clear();
+        filteredRecords = [];
+        renderPoints();
+        showToast(type === 'month' ? 'No hay registros en el mes en curso.' : 'No hay registros en el año en curso.');
+      }
+    }
+
+    function setInitialFilter() {
+      const now = new Date();
+
+      const monthRecords = allRecords.filter(r =>
+        r.date.getFullYear() === now.getFullYear() &&
+        r.date.getMonth() === now.getMonth()
+      );
+
+      if (monthRecords.length) {
+        setQuickFilter('month');
+        return;
+      }
+
+      const yearRecords = allRecords.filter(r =>
+        r.date.getFullYear() === now.getFullYear()
+      );
+
+      if (yearRecords.length) {
+        setQuickFilter('year');
+        return;
+      }
+
+      setQuickFilter('all');
+    }
+
+    function applyCustomFilter() {
+      if (!dateFromPicker?.selectedDates?.[0] || !dateToPicker?.selectedDates?.[0]) {
+        showToast('Seleccioná las fechas Desde y Hasta.');
+        return;
+      }
+
+      currentQuickFilter = 'custom';
+      setActiveQuickButton('custom');
+      applyFilter(dateFromPicker.selectedDates[0], dateToPicker.selectedDates[0]);
+    }
+
+    function applyFilter(fromDate, toDate) {
+      const from = startOfDay(fromDate);
+      const to = endOfDay(toDate);
+
+      if (from > to) {
+        showToast('La fecha Desde no puede ser posterior a Hasta.');
+        return;
+      }
+
+      // filteredRecords = allRecords.filter(r => r.date >= from && r.date <= to).sort((a, b) => a.date - b.date);
+      filteredRecords = allRecords
+        .filter(r => r.date >= from && r.date <= to)
+        .sort((a, b) => a.date - b.date);
+
+      renderPoints();
+      updateActiveFilterLabel();
+
+    }
+
+    function markerCategory(index, total) {
+      if (index === total - 1) return 'latest';
+      if (index >= Math.max(0, total - 10)) return 'recent';
+      return 'older';
+    }
+
+    function markerColor(index, total) {
+      return COLORS[markerCategory(index, total)];
+    }
+
+    // function makeMarkerIcon(color) {
+    //   return L.divIcon({
+    //     className: '',
+    //     html: `<div class="custom-marker" style="background:${color}"></div>`,
+    //     iconSize: [16, 16],
+    //     iconAnchor: [8, 8],
+    //     popupAnchor: [0, -8]
+    //   });
+    // }
+
+
+    function makeMarkerIcon(color, category) {
+
+      let size = 16; // 🟢 verdes
+
+      if (category === 'latest') {
+        size = 26; // 🔴 último registro
+      } else if (category === 'recent') {
+        size = 19; // 🟠 9 anteriores
+      }
+
+      const half = size / 2;
+
+      return L.divIcon({
+        className: '',
+        html: `<div class="custom-marker" style="background:${color}; width:${size}px; height:${size}px;"></div>`,
+        iconSize: [size, size],
+        iconAnchor: [half, half],
+        popupAnchor: [0, -half]
+      });
+    }
+
+
+    function renderPoints() {
+      pointsLayer.clearLayers();
+      Object.keys(categoryMarkers).forEach(category => {
+        categoryMarkers[category] = [];
+        categoryCoords[category] = [];
+      });
+
+      if (!filteredRecords.length) {
+        emptyState.style.display = 'block';
+        mapMeta.textContent = '0 registros en el período seleccionado';
+        updateLegendAvailability();
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      const bounds = [];
+
+      filteredRecords.forEach((record, index) => {
+        const category = markerCategory(index, filteredRecords.length);
+        const color = COLORS[category];
+
+        // const marker = L.marker([record.lat, record.lng], {
+        //   icon: makeMarkerIcon(color, category),
+        //   title: `${formatDateWithDay(record.date)} ${formatTime(record.date)}`
+        // });
+
+        const marker = L.marker([record.lat, record.lng], {
+          icon: makeMarkerIcon(color, category),
+          pane:
+            category === 'latest' ? 'latestPane' :
+            category === 'recent' ? 'recentPane' :
+            'olderPane',
+          title: `${formatDateWithDay(record.date)} ${formatTime(record.date)}`
+        });
+
+        marker.bindPopup(`Fecha: ${formatDateWithDay(record.date)} | Hora: ${formatTime(record.date)}`);
+        marker._surveyCategory = category;
+        categoryMarkers[category].push(marker);
+        categoryCoords[category].push([record.lat, record.lng]);
+        bounds.push([record.lat, record.lng]);
+      });
+
+      applyCategoryVisibility();
+      updateLegendAvailability();
+
+      map.invalidateSize(true);
+      if (bounds.length === 1) {
+        map.setView(bounds[0], 17, { animate: true });
+      } else {
+        map.fitBounds(bounds, { padding: [35, 35], maxZoom: 18, animate: true });
+      }
+    }
+
+    function applyCategoryVisibility() {
+      Object.entries(categoryMarkers).forEach(([category, markers]) => {
+        markers.forEach(marker => {
+          const shouldShow = categoryVisibility[category];
+          const isShown = pointsLayer.hasLayer(marker);
+          if (shouldShow && !isShown) pointsLayer.addLayer(marker);
+          if (!shouldShow && isShown) pointsLayer.removeLayer(marker);
+        });
+      });
+
+      updateVisibleCount();
+    }
+
+    function updateVisibleCount() {
+      const visible = Object.entries(categoryMarkers)
+        .filter(([category]) => categoryVisibility[category])
+        .reduce((sum, [, markers]) => sum + markers.length, 0);
+
+      // mapMeta.textContent = `${visible} ${visible === 1 ? 'registro visible' : 'registros visibles'}`;
+      mapMeta.textContent = `${visible} ${visible === 1 ? 'encuesta visible' : 'encuestas visibles'}`;
+    }
+
+    function updateLegendAvailability() {
+      const controls = {
+        latest: document.getElementById('zoomLatest'),
+        recent: document.getElementById('zoomRecent'),
+        older: document.getElementById('zoomOlder')
+      };
+
+      Object.entries(controls).forEach(([category, button]) => {
+        if (button) button.disabled = categoryCoords[category].length === 0;
+      });
+    }
+
+    function zoomToCategory(category) {
+      const coords = categoryCoords[category] || [];
+      if (!coords.length) return;
+
+      if (coords.length === 1) {
+        map.flyTo(coords[0], 18, { animate: true, duration: 0.7 });
+        return;
+      }
+
+      map.flyToBounds(L.latLngBounds(coords), {
+        padding: [45, 45],
+        maxZoom: 18,
+        animate: true,
+        duration: 0.7
+      });
+    }
+
+    function updateActiveFilterLabel() {
+      if (!activeFilterLabel) return;
+
+      if (currentQuickFilter === 'month') {
+        activeFilterLabel.textContent =
+          'Filtro aplicado: Encuestas del MES en curso';
+        return;
+      }
+
+      if (currentQuickFilter === 'year') {
+        activeFilterLabel.textContent =
+          'Filtro aplicado: Encuestas del AÑO en curso';
+        return;
+      }
+
+      if (currentQuickFilter === 'all') {
+        if (!allRecords.length) {
+          activeFilterLabel.textContent = '';
+          return;
+        }
+
+        const first = allRecords[0].date;
+        const last = allRecords[allRecords.length - 1].date;
+
+        // activeFilterLabel.textContent =
+        //   `Filtro aplicado: Todas las encuestas realizadas del ${formatDate(first)} al ${formatDate(last)}`;
+        activeFilterLabel.textContent =
+          `Filtro aplicado: Todas las encuestas realizadas del ${formatDateWithDay(first)} al ${formatDateWithDay(last)}`;
+        return;
+      }
+
+      if (currentQuickFilter === 'custom') {
+        const from = dateFromPicker?.selectedDates?.[0];
+        const to = dateToPicker?.selectedDates?.[0];
+
+        if (from && to) {
+          // activeFilterLabel.textContent =
+          //   `Filtro aplicado: Encuestas realizadas entre el ${formatDate(from)} y el ${formatDate(to)}`;
+          activeFilterLabel.textContent =
+            `Filtro aplicado: Encuestas realizadas entre el ${formatDateWithDay(from)} y el ${formatDateWithDay(to)}`;
+        }
+      }
+    }
+
+    function filterLabel() {
+      if (!filteredRecords.length) return 'Sin registros para el filtro aplicado';
+      const from = dateFromPicker?.selectedDates?.[0];
+      const to = dateToPicker?.selectedDates?.[0];
+
+      let name = 'Personalizado';
+      if (currentQuickFilter === 'month') name = 'Mes en curso';
+      if (currentQuickFilter === 'year') name = 'Año en curso';
+      if (currentQuickFilter === 'all') name = 'Todos';
+
+      //if (from && to) return `${name} · ${formatDate(from)} al ${formatDate(to)}`;
+      if (from && to) return `${name} · ${formatDateWithDay(from)} al ${formatDateWithDay(to)}`;
+      return name;
+    }
+
+    async function downloadPNG() {
+      if (!filteredRecords.length) {
+        showToast('No hay puntos para exportar.');
+        return;
+      }
+
+      loadingText.textContent = 'Preparando imagen del mapa…';
+      loadingOverlay.classList.add('show');
+      btnDownload.disabled = true;
+
+      try {
+        await waitForMapTiles();
+
+        const exportWrap = document.createElement('div');
+        exportWrap.className = 'export-clone';
+
+        const header = document.createElement('div');
+        header.className = 'export-header';
+        header.innerHTML = `
+          <div>
+            <h2>Encuesta Permanente de Hogares</h2>
+            <p>Municipalidad de Jesús María · Mapa de encuestas</p>
+          </div>
+          <img src="https://raw.githubusercontent.com/modernizacionmjm/web/refs/heads/main/Logos/LogoDef.png" alt="Municipalidad de Jesús María">
+        `;
+        exportWrap.appendChild(header);
+
+        // const mapCloneHolder = document.createElement('div');
+        // mapCloneHolder.style.width = '1348px';
+        // mapCloneHolder.style.height = '760px';
+        // mapCloneHolder.style.overflow = 'hidden';
+        // mapCloneHolder.style.borderRadius = '18px';
+        // mapCloneHolder.style.border = '1px solid #d5e2e8';
+        // mapCloneHolder.style.background = '#dfe7ec';
+        // exportWrap.appendChild(mapCloneHolder);
+
+        const mapElement = document.getElementById('map');
+        const mapWidth = mapElement.clientWidth;
+        const mapHeight = mapElement.clientHeight;
+        const mapRatio = mapHeight / mapWidth;
+
+        const exportMapWidth = 1348;
+        const exportMapHeight = Math.round(exportMapWidth * mapRatio);
+
+        const mapCloneHolder = document.createElement('div');
+        mapCloneHolder.style.width = `${exportMapWidth}px`;
+        mapCloneHolder.style.height = `${exportMapHeight}px`;
+        mapCloneHolder.style.overflow = 'hidden';
+        mapCloneHolder.style.borderRadius = '18px';
+        mapCloneHolder.style.border = '1px solid #d5e2e8';
+        mapCloneHolder.style.background = '#dfe7ec';
+        exportWrap.appendChild(mapCloneHolder);
+
+
+        document.body.appendChild(exportWrap);
+
+        // const mapCanvas = await html2canvas(document.getElementById('map'), {
+        //   useCORS: true,
+        //   allowTaint: false,
+        //   logging: false,
+        //   backgroundColor: '#dfe7ec',
+        //   scale: Math.min(2, window.devicePixelRatio || 1.5),
+        //   imageTimeout: 12000
+        // });
+
+        const mapCanvas = await html2canvas(mapElement, {
+          useCORS: true,
+          allowTaint: false,
+          logging: false,
+          backgroundColor: '#dfe7ec',
+
+          // Mayor resolución para que calles, textos y puntos salgan nítidos
+          scale: 3,
+
+          imageTimeout: 12000,
+
+          // No incluir el selector Google Satellite / OpenStreetMap
+          ignoreElements: (element) => {
+            return element.classList?.contains('leaflet-control-layers');
+          }
+        });
+
+
+        // const mapImg = document.createElement('img');
+        // mapImg.src = mapCanvas.toDataURL('image/png');
+        // mapImg.style.width = '100%';
+        // mapImg.style.height = '100%';
+        // mapImg.style.objectFit = 'cover';
+        // mapCloneHolder.appendChild(mapImg);
+
+        const mapImg = document.createElement('img');
+        mapImg.src = mapCanvas.toDataURL('image/png');
+        mapImg.style.display = 'block';
+        mapImg.style.width = '100%';
+        mapImg.style.height = '100%';
+        mapImg.style.objectFit = 'contain';
+        mapCloneHolder.appendChild(mapImg);
+
+
+        const info = document.createElement('div');
+        info.className = 'export-info';
+        info.innerHTML = `
+          <span>
+            <strong>Filtro aplicado:</strong>
+            <span style="color:#0303fc;">${escapeHtml(filterLabel())}</span>
+          </span>  
+          <span><strong>Registros:</strong> ${filteredRecords.length}</span>
+          <div class="export-legend">
+            <strong>Referencias:</strong>
+            <span><i class="legend-dot" style="background:${COLORS.latest}"></i>Última encuesta</span>
+            <span><i class="legend-dot" style="background:${COLORS.recent}"></i>9 anteriores</span>
+            <span><i class="legend-dot" style="background:${COLORS.older}"></i>Todas las demás</span>
+          </div>
+        `;
+        exportWrap.appendChild(info);
+
+        await waitForImages(exportWrap);
+
+        loadingText.textContent = 'Generando PNG…';
+        const finalCanvas = await html2canvas(exportWrap, {
+          useCORS: true,
+          allowTaint: false,
+          logging: false,
+          backgroundColor: '#f4f7f9',
+          // scale: 1.35,
+          scale: 2,
+          imageTimeout: 12000
+        });
+
+        // const link = document.createElement('a');
+        // const stamp = new Date().toISOString().slice(0, 10);
+        // link.download = `encuesta-permanente-hogares_${stamp}.png`;
+        // link.href = finalCanvas.toDataURL('image/png');
+        // link.click();
+
+        const link = document.createElement('a');
+
+        const now = new Date();
+
+        const dd = String(now.getDate()).padStart(2, '0');
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const yyyy = now.getFullYear();
+        const HH = String(now.getHours()).padStart(2, '0');
+        const MM = String(now.getMinutes()).padStart(2, '0');
+
+        link.download = `EPH_${dd}${mm}${yyyy}_${HH}${MM}.png`;
+        link.href = finalCanvas.toDataURL('image/png');
+        link.click();
+
+        exportWrap.remove();
+        showToast('PNG descargado correctamente.');
+      } catch (error) {
+        console.error(error);
+        showToast('No se pudo generar el PNG. Probá exportando con OpenStreetMap seleccionado.');
+      } finally {
+        btnDownload.disabled = false;
+        loadingOverlay.classList.remove('show');
+      }
+    }
+
+    function waitForMapTiles(timeout = 5000) {
+      return new Promise(resolve => {
+        const start = Date.now();
+        const check = () => {
+          const tiles = [...document.querySelectorAll('#map .leaflet-tile')];
+          const allReady = tiles.length && tiles.every(img => img.complete && img.naturalWidth > 0);
+          if (allReady || Date.now() - start > timeout) return resolve();
+          setTimeout(check, 120);
+        };
+        check();
+      });
+    }
+
+    function waitForImages(root) {
+      const images = [...root.querySelectorAll('img')];
+      return Promise.all(images.map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      }));
+    }
+
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>'"]/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[char]));
+    }
+
+    let toastTimer = null;
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    btnMonth.addEventListener('click', () => setQuickFilter('month'));
+    btnYear.addEventListener('click', () => setQuickFilter('year'));
+    btnAll.addEventListener('click', () => setQuickFilter('all'));
+    btnFilter.addEventListener('click', applyCustomFilter);
+    btnDownload.addEventListener('click', downloadPNG);
+
+    window.addEventListener('resize', () => map.invalidateSize());
+
+    loadData();
+  </script>
+</body>
+</html>
