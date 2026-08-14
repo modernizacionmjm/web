@@ -854,6 +854,55 @@
     }
 
 
+    .barrio-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding-bottom: 10px;
+      margin-bottom: 7px;
+      border-bottom: 1px solid #dce7ed;
+    }
+
+    .barrio-panel-header .barrio-panel-title {
+      padding-bottom: 0;
+      margin-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .barrio-order {
+      display: none;
+      align-items: center;
+      gap: 7px;
+      color: #536f80;
+      font-size: .78rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .map-layout.many-barrios .barrio-order {
+      display: flex;
+    }
+
+    .barrio-order label {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      color: #18384c;
+    }
+
+    .barrio-order input[type="radio"] {
+      margin: 0;
+      cursor: pointer;
+      accent-color: #0303fc;
+    }
+
+    .barrio-order-separator {
+      color: #a8b8c1;
+    }
+
+
   </style>
 </head>
 <body>
@@ -941,8 +990,28 @@
         </div>
 
         <aside class="barrio-panel" id="barrioPanel">
-          <div class="barrio-panel-title">Encuestas por barrio</div>
+          <!-- <div class="barrio-panel-title">Encuestas por barrio</div> -->
 
+          <div class="barrio-panel-header">
+            <div class="barrio-panel-title">Encuestas por barrio</div>
+
+            <div class="barrio-order" id="barrioOrder">
+              <span>Orden:</span>
+
+              <label>
+                <input type="radio" name="barrioOrder" value="cantidad" checked>
+                Por Cantidad
+              </label>
+
+              <span class="barrio-order-separator">|</span>
+
+              <label>
+                <input type="radio" name="barrioOrder" value="nombre">
+                Por Nombre
+              </label>
+            </div>
+          </div>
+          
           <div class="barrio-panel-body" id="barrioPanelBody">
             <div class="barrio-empty">
               Cargando barrios…
@@ -988,6 +1057,8 @@
     let barriosGeojson = null;
     let barrioStats = [];
 
+    let barrioOrderMode = 'cantidad';
+
     const COLORS = {
       latest: '#e53935',
       recent: '#f59e0b',
@@ -1031,6 +1102,9 @@
     const btnAll = document.getElementById('btnAll');
     const btnFilter = document.getElementById('btnFilter');
     const btnDownload = document.getElementById('btnDownload');
+
+
+
 
     const map = L.map('map', {
       zoomControl: true,
@@ -1428,16 +1502,46 @@
         }
       });
 
+      // barrioStats = [...statsMap.entries()]
+      //   .map(([nombre, data]) => ({
+      //     nombre,
+      //     cantidad: data.cantidad,
+      //     ultimaFecha: data.ultimaFecha
+      //   }))
+      //   .sort((a, b) =>
+      //     b.cantidad - a.cantidad ||
+      //     a.nombre.localeCompare(b.nombre, 'es')
+      //   );
+
       barrioStats = [...statsMap.entries()]
         .map(([nombre, data]) => ({
           nombre,
           cantidad: data.cantidad,
           ultimaFecha: data.ultimaFecha
-        }))
-        .sort((a, b) =>
-          b.cantidad - a.cantidad ||
-          a.nombre.localeCompare(b.nombre, 'es')
+        }));
+
+      if (barrioOrderMode === 'nombre') {
+
+        // Alfabético A → Z
+        barrioStats.sort((a, b) =>
+          a.nombre.localeCompare(b.nombre, 'es', {
+            sensitivity: 'base'
+          })
         );
+
+      } else {
+
+        // Mayor cantidad → menor cantidad
+        barrioStats.sort((a, b) =>
+          b.cantidad - a.cantidad ||
+          a.nombre.localeCompare(b.nombre, 'es', {
+            sensitivity: 'base'
+          })
+        );
+      }
+
+      return barrioStats;
+
 
       return barrioStats;
     }
@@ -1612,9 +1716,30 @@
     }
 
 
+    document.querySelectorAll('input[name="barrioOrder"]').forEach(input => {
+      input.addEventListener('change', event => {
+
+        barrioOrderMode = event.target.value;
+
+        updateBarrioPanel();
+      });
+    });
+
+
 
     function createExportBarrioPanel() {
       const stats = calculateBarrioStats();
+
+      
+      const barrioOrder = document.getElementById('barrioOrder');
+
+      if (barrioOrder) {
+        barrioOrder.style.display =
+          currentQuickFilter === 'all' && stats.length > 12
+            ? 'flex'
+            : 'none';
+      }
+
 
       const panel = document.createElement('div');
       panel.className = 'export-barrio-panel';
