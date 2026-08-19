@@ -82,7 +82,7 @@
     .weeks{display:flex;flex-direction:column}.week-block{border-left:1px solid #c5cbd5}
     .week-note-wrap{display:grid;grid-template-columns:165px 1fr;min-height:44px;border-bottom:1px solid #c5cbd5;border-right:1px solid #c5cbd5;background:#fffcf1}
     .week-label{padding:10px 12px;font-size:11px;color:#6b613d;font-weight:700;display:flex;align-items:center;border-right:1px solid #ded5b1;white-space:nowrap;letter-spacing:.02em}
-    .week-note{padding:10px 12px;outline:none;min-height:44px;white-space:pre-wrap;overflow-wrap:anywhere}
+    .week-note{padding:10px 12px;outline:none;min-height:44px;white-space:pre-wrap;overflow-wrap:anywhere;-webkit-user-select:text;user-select:text;touch-action:manipulation}
     .week-note:empty::before{content:"Nota o actividad general para esta semana...";color:#a3a3a3;font-size:13px;font-weight:400}
     .week-note:focus,.day-editor:focus{box-shadow:inset 0 0 0 2px rgba(36,87,214,.18);border-radius:5px}
     .days-row{display:grid;grid-template-columns:repeat(7,minmax(150px,1fr))}
@@ -90,7 +90,7 @@
     .day.outside{background:#f8fafc;color:#9ca3af}.day.weekend:not(.outside){background:var(--weekend)}.day.today{background:var(--today)}
     .day-number{position:absolute;left:9px;top:7px;font-weight:700;font-size:14px;line-height:23px;min-width:23px;height:23px;text-align:center;border-radius:999px;z-index:1;user-select:none}
     .day.today .day-number{background:var(--accent);color:#fff}
-    .day-editor{min-height:96px;height:100%;outline:none;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.3}
+    .day-editor{min-height:96px;height:100%;outline:none;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.3;-webkit-user-select:text;user-select:text;touch-action:manipulation}
     .day-editor:empty::before{content:"Escribir...";color:#c1c5cc;font-size:12px;font-weight:400}
     .bottom-actions{display:flex;justify-content:center;gap:10px;padding:18px 0 0}.download{min-width:235px;min-height:50px;font-size:15px;border-radius:13px}
     .tip{text-align:center;color:var(--muted);font-size:12px;margin:10px 0 0}
@@ -217,13 +217,56 @@
       return `font-size:${formatState.fontSize}px;color:${formatState.color};font-weight:${formatState.bold?'700':'400'};`;
     }
 
-    function insertStyledText(text){
+    let activeEditable=null;
+    let savedRange=null;
+
+    function editableFromNode(node){
+      if(!node)return null;
+      const el=node.nodeType===Node.ELEMENT_NODE?node:node.parentElement;
+      return el?.closest?.('.day-editor,.week-note')||null;
+    }
+
+    function rememberSelection(){
       const sel=window.getSelection();
-      if(!sel.rangeCount)return;
+      if(!sel || !sel.rangeCount)return;
       const range=sel.getRangeAt(0);
+      const editor=editableFromNode(range.commonAncestorContainer);
+      if(!editor)return;
+      activeEditable=editor;
+      savedRange=range.cloneRange();
+    }
+
+    function getUsableRange(preferredEditor=null){
+      const sel=window.getSelection();
+      if(sel && sel.rangeCount){
+        const live=sel.getRangeAt(0);
+        const editor=editableFromNode(live.commonAncestorContainer);
+        if(editor && (!preferredEditor || editor===preferredEditor)){
+          activeEditable=editor;
+          savedRange=live.cloneRange();
+          return live;
+        }
+      }
+
+      if(savedRange && activeEditable && (!preferredEditor || activeEditable===preferredEditor)){
+        try{
+          if(document.contains(savedRange.commonAncestorContainer)){
+            return savedRange.cloneRange();
+          }
+        }catch(_){}
+      }
+      return null;
+    }
+
+    function insertStyledText(text,preferredEditor=null){
+      const editor=preferredEditor||activeEditable;
+      const range=getUsableRange(editor);
+      if(!range || !editor)return false;
+
       range.deleteContents();
       const frag=document.createDocumentFragment();
       const parts=String(text).split('\n');
+
       parts.forEach((part,i)=>{
         if(part){
           const span=document.createElement('span');
@@ -233,33 +276,63 @@
         }
         if(i<parts.length-1)frag.appendChild(document.createElement('br'));
       });
-      const marker=document.createTextNode('');
+
+      const marker=document.createTextNode('\u200B');
       frag.appendChild(marker);
       range.insertNode(frag);
+
+      const sel=window.getSelection();
       range.setStartAfter(marker);
       range.collapse(true);
-      sel.removeAllRanges();sel.addRange(range);
+      sel.removeAllRanges();
+      sel.addRange(range);
       marker.remove();
+
+      activeEditable=editor;
+      savedRange=range.cloneRange();
+      return true;
     }
 
     function setupEditable(el){
+      el.addEventListener('focus',()=>{
+        activeEditable=el;
+        el.style.fontSize=`${formatState.fontSize}px`;
+        el.style.color=formatState.color;
+        el.style.fontWeight=formatState.bold?'700':'400';
+        setTimeout(rememberSelection,0);
+      });
+
+      ['keyup','mouseup','touchend','pointerup'].forEach(evt=>{
+        el.addEventListener(evt,()=>setTimeout(rememberSelection,0),{passive:true});
+      });
+
       el.addEventListener('beforeinput',e=>{
-        if(e.inputType==='insertText' && e.data!==null){
+        activeEditable=el;
+
+        if((e.inputType==='insertText' || e.inputType==='insertReplacementText') && e.data!==null){
           e.preventDefault();
-          insertStyledText(e.data);
-          el.dispatchEvent(new Event('input'));
+          if(insertStyledText(e.data,el))el.dispatchEvent(new Event('input'));
         }else if(e.inputType==='insertParagraph' || e.inputType==='insertLineBreak'){
           e.preventDefault();
-          insertStyledText('\n');
-          el.dispatchEvent(new Event('input'));
+          if(insertStyledText('\n',el))el.dispatchEvent(new Event('input'));
         }
       });
+
       el.addEventListener('paste',e=>{
         e.preventDefault();
-        insertStyledText(e.clipboardData.getData('text/plain'));
-        el.dispatchEvent(new Event('input'));
+        activeEditable=el;
+        const text=e.clipboardData?.getData('text/plain')||'';
+        if(insertStyledText(text,el))el.dispatchEvent(new Event('input'));
+      });
+
+      el.addEventListener('input',()=>{
+        activeEditable=el;
+        rememberSelection();
       });
     }
+
+    document.addEventListener('selectionchange',rememberSelection);
+    document.querySelector('.toolbar').addEventListener('pointerdown',()=>rememberSelection(),true);
 
     function renderWeekdays(){weekdayRow.innerHTML='';DAY_NAMES[weekStart].forEach(name=>{const div=document.createElement('div');div.className='weekday';div.textContent=name;weekdayRow.appendChild(div)})}
 
@@ -290,9 +363,32 @@
       syncFormatUI();
     }
 
-    boldBtn.addEventListener('click',()=>{formatState.bold=!formatState.bold;syncFormatUI();showToast(formatState.bold?'Negrita activada para lo próximo que escribas.':'Negrita desactivada para lo próximo que escribas.')});
-    fontSizeSelect.addEventListener('change',()=>{formatState.fontSize=Number(fontSizeSelect.value);showToast(`Lo próximo que escribas será de ${formatState.fontSize}px.`)});
-    textColor.addEventListener('input',()=>{formatState.color=textColor.value;colorDot.style.background=formatState.color});
+    function applyFormatFallbackToActiveEditor(){
+      if(!activeEditable)return;
+      activeEditable.style.fontSize=`${formatState.fontSize}px`;
+      activeEditable.style.color=formatState.color;
+      activeEditable.style.fontWeight=formatState.bold?'700':'400';
+    }
+
+    boldBtn.addEventListener('click',()=>{
+      formatState.bold=!formatState.bold;
+      syncFormatUI();
+      applyFormatFallbackToActiveEditor();
+      showToast(formatState.bold?'Negrita activada para lo próximo que escribas.':'Negrita desactivada para lo próximo que escribas.');
+    });
+
+    fontSizeSelect.addEventListener('change',()=>{
+      formatState.fontSize=Number(fontSizeSelect.value);
+      applyFormatFallbackToActiveEditor();
+      showToast(`Lo próximo que escribas será de ${formatState.fontSize}px.`);
+    });
+
+    textColor.addEventListener('input',()=>{
+      formatState.color=textColor.value;
+      colorDot.style.background=formatState.color;
+      applyFormatFallbackToActiveEditor();
+    });
+
     textColor.addEventListener('change',()=>showToast('Color elegido para lo próximo que escribas.'));
 
     yearInput.addEventListener('change',()=>{saveVisibleContent();let y=Number(yearInput.value);if(!Number.isFinite(y))y=new Date().getFullYear();y=Math.min(2200,Math.max(1900,y));current=new Date(y,current.getMonth(),1);render(false)});
