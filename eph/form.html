@@ -1,4 +1,4 @@
-<!-- 28042026_1200 -->
+<!-- 24092026_1240 -->
 <!doctype html>
 <html lang="es">
 <head>
@@ -3062,6 +3062,10 @@
       }
       state.hdrRow = row;
       state.hdr = mapHdrRowToObj(row);
+
+      console.log("HDR:", state.hdr);
+      console.log("IDENTVIV:", state.hdr?.identviv);
+
       renderHdR();
 
       showBlockButtonsForMode("hdr");
@@ -4157,12 +4161,26 @@
 
 
 
+      // const viviendaIdBloqueE = String(parseInt(String(state.hdr.identviv || "").trim(), 10));
+
+      // console.log("Bloque E - identviv original:", state.hdr.identviv);
+      // console.log("Bloque E - viviendaId enviado:", viviendaIdBloqueE);
+
+      // await cargarSelectorBloqueE(viviendaIdBloqueE);
+
+
       const viviendaIdBloqueE = String(parseInt(String(state.hdr.identviv || "").trim(), 10));
+      const idBloqueAyB = String(state.idBloqAyB || "").trim();
 
-      console.log("Bloque E - identviv original:", state.hdr.identviv);
-      console.log("Bloque E - viviendaId enviado:", viviendaIdBloqueE);
+      if (!idBloqueAyB) {
+        throw new Error("No existe ID BloqueAyB seleccionado.");
+      }
 
-      await cargarSelectorBloqueE(viviendaIdBloqueE);
+      console.log("Bloque E - identviv:", viviendaIdBloqueE);
+      console.log("Bloque E - ID BloqueAyB:", idBloqueAyB);
+
+      await cargarSelectorBloqueE(viviendaIdBloqueE, idBloqueAyB);
+
 
       showScreen("bloqueEView");
 
@@ -4229,9 +4247,16 @@
 
 
 
-  async function cargarSelectorBloqueE(viviendaId) {
-    const url = `${scriptUrl}?action=bloqueE_componentes&viviendaId=${encodeURIComponent(viviendaId)}`;
+  // async function cargarSelectorBloqueE(viviendaId) {
+  //   const url = `${scriptUrl}?action=bloqueE_componentes&viviendaId=${encodeURIComponent(viviendaId)}`;
     
+  async function cargarSelectorBloqueE(viviendaId, idBloqueAyB) {
+    const url =
+      `${scriptUrl}?action=bloqueE_componentes` +
+      `&viviendaId=${encodeURIComponent(viviendaId)}` +
+      `&idBloqueAyB=${encodeURIComponent(idBloqueAyB)}`;
+
+
     console.log("Bloque E - URL:", url);
 
     const res = await fetch(url + `&_=${Date.now()}`, { cache: "no-store" });
@@ -6577,12 +6602,15 @@
       }
 
       const viviendaId = String(meta.viviendaId || '').trim();
+      const idBloqueAyB = String(meta.idBloqueAyB || state.idBloqAyB || '').trim();
       const componenteActual = String(sel.componente || '').trim();
 
       showOverlay('Bloque E guardado', 'Redirigiendo a la tabla de componentes...');
       
       await new Promise(r => setTimeout(r, 1200));
-      await cargarSelectorBloqueE(viviendaId);
+
+      // await cargarSelectorBloqueE(viviendaId);
+      await cargarSelectorBloqueE(viviendaId, idBloqueAyB);
 
       if (Array.isArray(bloqueEState.componentes)) {
         const encontrado = bloqueEState.componentes.find(x => String(x.componente).trim() === componenteActual);
@@ -7479,10 +7507,22 @@
   }
 
   async function cargarComponentesBloqueFyG(){
-    const ident = String(state.hdr?.identviv || '').trim();
-    if(!ident) return [];
+    // const ident = String(state.hdr?.identviv || '').trim();
+    // if(!ident) return [];
 
-    const url = `${scriptUrl}?action=${encodeURIComponent(BLOQUE_FYG_SCRIPT_ACTION)}&ident=${encodeURIComponent(ident)}`;
+    // const url = `${scriptUrl}?action=${encodeURIComponent(BLOQUE_FYG_SCRIPT_ACTION)}&ident=${encodeURIComponent(ident)}`;
+
+
+    const ident = String(state.hdr?.identviv || '').trim();
+    const idBloqueAyB = String(state.idBloqAyB || '').trim();
+
+    if(!ident || !idBloqueAyB) return [];
+
+    const url =
+      `${scriptUrl}?action=${encodeURIComponent(BLOQUE_FYG_SCRIPT_ACTION)}` +
+      `&ident=${encodeURIComponent(ident)}` +
+      `&idBloqueAyB=${encodeURIComponent(idBloqueAyB)}`;
+
     const res = await fetch(url);
     const txt = await res.text();
 
