@@ -1731,7 +1731,7 @@
     </section>
 
 
-    <section class="screen" id="screenD_4">
+    <!-- <section class="screen" id="screenD_4">
       <div class="titleOrange">EDUCACIÓN</div>
 
       <div class="field">
@@ -1818,7 +1818,219 @@
       </div>
 
       <div class="error" id="d4Error"></div>
+    </section> -->
+
+
+
+    <!-- EDUCACIÓN: preguntas 9 y 10 -->
+    <section class="screen" id="screenD_4">
+      <div class="titleOrange">EDUCACIÓN</div>
+
+      <div class="field">
+        <div class="label">9. ¿Sabe leer y escribir?</div>
+        <select id="dSableescrSel">
+          <option value="">Seleccione...</option>
+          <option>Sí</option>
+          <option>No</option>
+          <option>Menor a 2 años</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">10. ¿Asiste o asistió a algún establecimiento educativo/guardería?</div>
+        <select id="dAsistesteducSel">
+          <option value="">Seleccione...</option>
+          <option>Si asiste</option>
+          <option>No asiste pero asistió</option>
+          <option>Nunca asistió</option>
+        </select>
+      </div>
+
+      <div class="row" style="justify-content:space-between; margin-top:10px;">
+        <button class="btn btn-ghost" id="btnD4_Ant">Anterior</button>
+        <button class="btn btn-orange" id="btnD4_Sig">Siguiente</button>
+      </div>
+
+      <div class="error" id="d4Error"></div>
     </section>
+
+
+    <!-- EDUCACIÓN: preguntas 11, 12, 12.1 y 13 -->
+    <section class="screen" id="screenD_4A">
+      <div class="titleOrange">EDUCACIÓN</div>
+
+      <div class="field">
+        <div class="label">11. Tipo de establecimiento</div>
+        <select id="dTipoestSel">
+          <option value="">Seleccione...</option>
+          <option>Público</option>
+          <option>Privado</option>
+          <option>Ns/Nc</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">12. ¿Cuál es el nivel mas alto que cursa o cursó?</div>
+        <select id="dNivmasalSel">
+          <option value="">Seleccione...</option>
+          <option>Inicial(Jardin..preescolar)</option>
+          <option>Primario (EGB 1 y EGB 2)</option>
+          <option>EGB 3</option>
+          <option>Secundario</option>
+          <option>Polimodal</option>
+          <option>Superior no universitario</option>
+          <option>Universitario</option>
+          <option>Posgrado universitario</option>
+          <option>Educación Especial (Discapacitados)</option>
+        </select>
+      </div>
+
+      <div class="field" id="dTipjarWrap" style="display:none;">
+        <div class="label">12.1 Ese Jardín o Preescolar es?</div>
+        <select id="dTipjarSel">
+          <option value="">Seleccione...</option>
+          <option>Guardería</option>
+          <option>Jardin de infantes</option>
+          <option>Sala Cuna</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label">13. ¿Finalizó ese nivel?</div>
+        <select id="dFinjarSel">
+          <option value="">Seleccione...</option>
+          <option>Sí</option>
+          <option>No y continúa estudiando</option>
+          <option>No porque abandonó</option>
+        </select>
+      </div>
+
+      <div class="row" style="justify-content:space-between; margin-top:10px;">
+        <button class="btn btn-ghost" id="btnD4A_Ant">Anterior</button>
+        <button class="btn btn-orange" id="btnD4A_Sig">Siguiente</button>
+      </div>
+
+      <div class="error" id="d4AError"></div>
+    </section>
+
+
+    <!-- EDUCACIÓN: abandono -->
+    <section class="screen" id="screenD_4B">
+      <div class="titleOrange">EDUCACIÓN</div>
+
+      <div class="field">
+        <div class="label">13.1 ¿A qué edad dejó de asistir?</div>
+        <input
+          type="text"
+          id="dEdadDejoAsistir"
+          placeholder="EDAD"
+          autocomplete="off"
+          maxlength="3"
+          pattern="[0-9]*"
+          inputmode="numeric"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,3)">
+      </div>
+
+      <div class="field">
+        <div class="label">13.2 ¿Por qué motivo dejó de asistir?</div>
+        <div class="hint">Responda SI o NO en todos los motivos.</div>
+      </div>
+
+      <div class="field">
+        <div class="label">Porque me costaba estudiar</div>
+        <button class="siNoBtn" id="btnD_abandCostoEstudiar"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">Porque no entendía a los profesores</div>
+        <button class="siNoBtn" id="btnD_abandNoEntendiaProfesores"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">Porque tenía problemas con mis compañeros</div>
+        <button class="siNoBtn" id="btnD_abandProblemasCompaneros"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">Porque me aburría</div>
+        <button class="siNoBtn" id="btnD_abandAburria"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">Porque no me parecía útil lo que estudiaba</div>
+        <button class="siNoBtn" id="btnD_abandNoUtil"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">Porque tenía que trabajar</div>
+        <button class="siNoBtn" id="btnD_abandTrabajar"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">Porque tenía que cuidar hermanos y familiares</div>
+        <button class="siNoBtn" id="btnD_abandCuidarFamilia"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">Por maternidad/paternidad</div>
+        <button class="siNoBtn" id="btnD_abandMaternidadPaternidad"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">Por enfermedad</div>
+        <button class="siNoBtn" id="btnD_abandEnfermedad"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">Por problemas de consumo de alcohol y/o drogas</div>
+        <button class="siNoBtn" id="btnD_abandConsumo"></button>
+      </div>
+
+      <div class="field">
+        <div class="label">Porque era difícil llegar a la escuela</div>
+        <button class="siNoBtn" id="btnD_abandDificilLlegar"></button>
+      </div>
+
+      <div class="row" style="justify-content:space-between; margin-top:10px;">
+        <button class="btn btn-ghost" id="btnD4B_Ant">Anterior</button>
+        <button class="btn btn-orange" id="btnD4B_Sig">Siguiente</button>
+      </div>
+
+      <div class="error" id="d4BError"></div>
+    </section>
+
+
+    <!-- EDUCACIÓN: pregunta 14 -->
+    <section class="screen" id="screenD_4C">
+      <div class="titleOrange">EDUCACIÓN</div>
+
+      <div class="field">
+        <div class="label">14. ¿Cuál fue su último año aprobado?</div>
+        <select id="dUltanapSel">
+          <option value="">Seleccione...</option>
+          <option>Ninguno</option>
+          <option>Primero</option>
+          <option>Segundo</option>
+          <option>Tercero</option>
+          <option>Cuarto</option>
+          <option>Quinto</option>
+          <option>Sexto</option>
+          <option>Séptimo</option>
+          <option>Octavo</option>
+          <option>Noveno</option>
+          <option>Educación Especial</option>
+          <option>N/S N/R</option>
+        </select>
+      </div>
+
+      <div class="row" style="justify-content:space-between; margin-top:10px;">
+        <button class="btn btn-ghost" id="btnD4C_Ant">Anterior</button>
+        <button class="btn btn-orange" id="btnD4C_Sig">Siguiente</button>
+      </div>
+
+      <div class="error" id="d4CError"></div>
+    </section>
+
 
 
     <section class="screen" id="screenD_5">
@@ -3742,14 +3954,38 @@
   }
 
 
+  // [
+  //   "btnD_entrealiz",
+  //   "btnD_tieneospami",
+  //   "btnD_tienemutprepservem",
+  //   "btnD_tieneplaseg",
+  //   "btnD_consprofsal",
+  //   "btnD_perjub"
+  // ].forEach(initBotonSiNo);
+
+
   [
     "btnD_entrealiz",
     "btnD_tieneospami",
     "btnD_tienemutprepservem",
     "btnD_tieneplaseg",
     "btnD_consprofsal",
+
+    "btnD_abandCostoEstudiar",
+    "btnD_abandNoEntendiaProfesores",
+    "btnD_abandProblemasCompaneros",
+    "btnD_abandAburria",
+    "btnD_abandNoUtil",
+    "btnD_abandTrabajar",
+    "btnD_abandCuidarFamilia",
+    "btnD_abandMaternidadPaternidad",
+    "btnD_abandEnfermedad",
+    "btnD_abandConsumo",
+    "btnD_abandDificilLlegar",
+
     "btnD_perjub"
   ].forEach(initBotonSiNo);
+
 
   toUpperOnlyLetters($("dRespondente"));
   toUpperOnlyLetters($("dComponenteNom"));
@@ -3899,22 +4135,185 @@
     showScreen("screenD_4");
   });
 
+  // $("btnD4_Ant").addEventListener("click", () => showScreen("screenD_3"));
+  // $("btnD4_Sig").addEventListener("click", () => {
+  //   setError("d4Error","");
+  //   if(!$("dSableescrSel").value) return setError("d4Error","Responda 9.");
+  //   if(!$("dAsistesteducSel").value) return setError("d4Error","Responda 10.");
+  //   if(!$("dTipoestSel").value) return setError("d4Error","Responda 11.");
+  //   if(!$("dNivmasalSel").value) return setError("d4Error","Responda 12.");
+  //   if(!$("dFinjarSel").value) return setError("d4Error","Responda 13.");
+  //   if(!$("dUltanapSel").value) return setError("d4Error","Responda 14.");
+  //   if(($("dNivmasalSel").value||"") === "Inicial(Jardin..preescolar)" && !($("dTipjarSel").value||"")){
+  //     return setError("d4Error","Falta responder 12.1 (Tipo de Jardín/Preescolar).");
+  //   }
+  //   showScreen("screenD_5");
+  // });
+
+  // $("btnD5_Ant").addEventListener("click", () => showScreen("screenD_4"));
+
+
+
+  // -------------------------------------------------------
+  // EDUCACIÓN - pantalla 9 y 10
+  // -------------------------------------------------------
+
   $("btnD4_Ant").addEventListener("click", () => showScreen("screenD_3"));
+
   $("btnD4_Sig").addEventListener("click", () => {
     setError("d4Error","");
-    if(!$("dSableescrSel").value) return setError("d4Error","Responda 9.");
-    if(!$("dAsistesteducSel").value) return setError("d4Error","Responda 10.");
-    if(!$("dTipoestSel").value) return setError("d4Error","Responda 11.");
-    if(!$("dNivmasalSel").value) return setError("d4Error","Responda 12.");
-    if(!$("dFinjarSel").value) return setError("d4Error","Responda 13.");
-    if(!$("dUltanapSel").value) return setError("d4Error","Responda 14.");
-    if(($("dNivmasalSel").value||"") === "Inicial(Jardin..preescolar)" && !($("dTipjarSel").value||"")){
-      return setError("d4Error","Falta responder 12.1 (Tipo de Jardín/Preescolar).");
+
+    if(!$("dSableescrSel").value)
+      return setError("d4Error","Responda 9.");
+
+    if(!$("dAsistesteducSel").value)
+      return setError("d4Error","Responda 10.");
+
+    const asistencia = $("dAsistesteducSel").value;
+
+    // Nunca asistió:
+    // saltea 11, 12, 13 y 14 y va directamente a 15.
+    if(asistencia === "Nunca asistió"){
+      $("dTipoestSel").value = "";
+      $("dNivmasalSel").value = "";
+      $("dTipjarSel").value = "";
+      $("dFinjarSel").value = "";
+      $("dUltanapSel").value = "";
+
+      limpiarDatosAbandonoEducativo();
+
+      showScreen("screenD_5");
+      return;
     }
+
+    // Si asiste / No asiste pero asistió
+    showScreen("screenD_4A");
+  });
+
+
+  // -------------------------------------------------------
+  // EDUCACIÓN - pantalla 11, 12, 12.1 y 13
+  // -------------------------------------------------------
+
+  $("btnD4A_Ant").addEventListener("click", () => {
+    showScreen("screenD_4");
+  });
+
+  $("btnD4A_Sig").addEventListener("click", () => {
+    setError("d4AError","");
+
+    if(!$("dTipoestSel").value)
+      return setError("d4AError","Responda 11.");
+
+    if(!$("dNivmasalSel").value)
+      return setError("d4AError","Responda 12.");
+
+    if(
+      $("dNivmasalSel").value === "Inicial(Jardin..preescolar)" &&
+      !$("dTipjarSel").value
+    ){
+      return setError(
+        "d4AError",
+        "Falta responder 12.1 (Tipo de Jardín/Preescolar)."
+      );
+    }
+
+    if(!$("dFinjarSel").value)
+      return setError("d4AError","Responda 13.");
+
+    if($("dFinjarSel").value === "No porque abandonó"){
+      showScreen("screenD_4B");
+      return;
+    }
+
+    // Sí / No y continúa estudiando
+    limpiarDatosAbandonoEducativo();
+    showScreen("screenD_4C");
+  });
+
+
+  // -------------------------------------------------------
+  // EDUCACIÓN - pantalla 13.1 y 13.2
+  // -------------------------------------------------------
+
+  $("btnD4B_Ant").addEventListener("click", () => {
+    showScreen("screenD_4A");
+  });
+
+  $("btnD4B_Sig").addEventListener("click", () => {
+    setError("d4BError","");
+
+    if(!$("dEdadDejoAsistir").value.trim()){
+      return setError("d4BError","Responda 13.1.");
+    }
+
+    const motivos = [
+      ["btnD_abandCostoEstudiar", "Porque me costaba estudiar"],
+      ["btnD_abandNoEntendiaProfesores", "Porque no entendía a los profesores"],
+      ["btnD_abandProblemasCompaneros", "Porque tenía problemas con mis compañeros"],
+      ["btnD_abandAburria", "Porque me aburría"],
+      ["btnD_abandNoUtil", "Porque no me parecía útil lo que estudiaba"],
+      ["btnD_abandTrabajar", "Porque tenía que trabajar"],
+      ["btnD_abandCuidarFamilia", "Porque tenía que cuidar hermanos y familiares"],
+      ["btnD_abandMaternidadPaternidad", "Por maternidad/paternidad"],
+      ["btnD_abandEnfermedad", "Por enfermedad"],
+      ["btnD_abandConsumo", "Por problemas de consumo de alcohol y/o drogas"],
+      ["btnD_abandDificilLlegar", "Porque era difícil llegar a la escuela"]
+    ];
+
+    for(const [btnId, texto] of motivos){
+      if(!($(btnId).textContent || "").trim()){
+        return setError(
+          "d4BError",
+          `Falta responder SI/NO: ${texto}.`
+        );
+      }
+    }
+
+    showScreen("screenD_4C");
+  });
+
+
+  // -------------------------------------------------------
+  // EDUCACIÓN - pantalla 14
+  // -------------------------------------------------------
+
+  $("btnD4C_Ant").addEventListener("click", () => {
+    if($("dFinjarSel").value === "No porque abandonó"){
+      showScreen("screenD_4B");
+    }else{
+      showScreen("screenD_4A");
+    }
+  });
+
+  $("btnD4C_Sig").addEventListener("click", () => {
+    setError("d4CError","");
+
+    if(!$("dUltanapSel").value){
+      return setError("d4CError","Responda 14.");
+    }
+
     showScreen("screenD_5");
   });
 
-  $("btnD5_Ant").addEventListener("click", () => showScreen("screenD_4"));
+
+  // -------------------------------------------------------
+  // ANTERIOR desde pregunta 15
+  // -------------------------------------------------------
+
+  $("btnD5_Ant").addEventListener("click", () => {
+
+    // Si nunca asistió, llegó directamente desde preguntas 9/10.
+    if($("dAsistesteducSel").value === "Nunca asistió"){
+      showScreen("screenD_4");
+      return;
+    }
+
+    // En los demás casos llegó desde pregunta 14.
+    showScreen("screenD_4C");
+  });
+
+
   $("btnD5_Sig").addEventListener("click", () => {
     setError("d5Error","");
 
@@ -3982,6 +4381,26 @@
   autoProvPais("dDondeViviaSel","dProvviviaSel","dPaisviviaSel");
 
 
+
+  function limpiarDatosAbandonoEducativo(){
+    $("dEdadDejoAsistir").value = "";
+
+    [
+      "btnD_abandCostoEstudiar",
+      "btnD_abandNoEntendiaProfesores",
+      "btnD_abandProblemasCompaneros",
+      "btnD_abandAburria",
+      "btnD_abandNoUtil",
+      "btnD_abandTrabajar",
+      "btnD_abandCuidarFamilia",
+      "btnD_abandMaternidadPaternidad",
+      "btnD_abandEnfermedad",
+      "btnD_abandConsumo",
+      "btnD_abandDificilLlegar"
+    ].forEach(resetSiNoBtn);
+  }
+
+
   function resetBloqueDForm(){
     $("dHogarNro").value = "";
     $("dRespondente").value = "";
@@ -4013,6 +4432,9 @@
     $("dUltanapSel").value = "";
     toggleTipjar(); 
 
+    limpiarDatosAbandonoEducativo();
+
+
     $("dDondeNacioSel").value = "";
     $("dProvnacSel").value = "";
     $("dPaisnacSel").value = "";
@@ -4025,7 +4447,21 @@
     resetSiNoBtn("btnD_perjub");
     $("dImpJub").value = "";
 
-    ["d1Error","d2Error","d3Error","d4Error","d5Error","d6Error"].forEach(id => setError(id,""));
+    // ["d1Error","d2Error","d3Error","d4Error","d5Error","d6Error"].forEach(id => setError(id,""));
+
+
+    [
+      "d1Error",
+      "d2Error",
+      "d3Error",
+      "d4Error",
+      "d4AError",
+      "d4BError",
+      "d4CError",
+      "d5Error",
+      "d6Error"
+    ].forEach(id => setError(id,""));
+
   }
 
   function resetSiNoBtn(btnId){
@@ -4083,13 +4519,37 @@
       medultcons: upperTxt($("dMedultconsSel").value || ""),
       estultcons: upperTxt($("dEstultconsSel").value || ""),
 
+      // sableescr: upperTxt($("dSableescrSel").value || ""),
+      // asistesteduc: upperTxt($("dAsistesteducSel").value || ""),
+      // tipoest: upperTxt($("dTipoestSel").value || ""),
+      // nivmasal: upperTxt($("dNivmasalSel").value || ""),
+      // tipjar: upperTxt($("dTipjarSel").value || ""),
+      // finjar: upperTxt($("dFinjarSel").value || ""),
+      // ultanap: upperTxt($("dUltanapSel").value || ""),
+
+
       sableescr: upperTxt($("dSableescrSel").value || ""),
       asistesteduc: upperTxt($("dAsistesteducSel").value || ""),
       tipoest: upperTxt($("dTipoestSel").value || ""),
       nivmasal: upperTxt($("dNivmasalSel").value || ""),
       tipjar: upperTxt($("dTipjarSel").value || ""),
       finjar: upperTxt($("dFinjarSel").value || ""),
+
+      edaddejoasistir: String($("dEdadDejoAsistir").value || ""),
+      abandcostoestudiar: upperTxt(($("btnD_abandCostoEstudiar").textContent || "").trim()),
+      abandnoentendiaprofesores: upperTxt(($("btnD_abandNoEntendiaProfesores").textContent || "").trim()),
+      abandproblemascompaneros: upperTxt(($("btnD_abandProblemasCompaneros").textContent || "").trim()),
+      abandaburria: upperTxt(($("btnD_abandAburria").textContent || "").trim()),
+      abandnoutil: upperTxt(($("btnD_abandNoUtil").textContent || "").trim()),
+      abandtrabajar: upperTxt(($("btnD_abandTrabajar").textContent || "").trim()),
+      abandcuidarfamilia: upperTxt(($("btnD_abandCuidarFamilia").textContent || "").trim()),
+      abandmaternidadpaternidad: upperTxt(($("btnD_abandMaternidadPaternidad").textContent || "").trim()),
+      abandenfermedad: upperTxt(($("btnD_abandEnfermedad").textContent || "").trim()),
+      abandconsumo: upperTxt(($("btnD_abandConsumo").textContent || "").trim()),
+      abanddificilllegar: upperTxt(($("btnD_abandDificilLlegar").textContent || "").trim()),
+
       ultanap: upperTxt($("dUltanapSel").value || ""),
+
 
       lugnac: upperTxt($("dLugnacTxt").style.display === "none" ? "" : $("dLugnacTxt").value),
       provnac: upperTxt($("dProvnacSel").value || ""),
