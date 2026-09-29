@@ -2091,61 +2091,64 @@
         <input id="dPaisnacOtro" placeholder="ESPECIFIQUE" style="display:none; margin-top:10px;" />
       </div>
 
-      <div class="field">
-        <div class="label">16. ¿Dónde vivía hace 5 años?</div>
-        <select id="dDondeViviaSel">
-          <option value="">Seleccione...</option>
-          <option>En esta localidad</option>
-          <option>En otra localidad de esta provincia</option>
-          <option>En otra provincia ( especificar)</option>
-          <option>En un país limítrofe (especificar)</option>
-          <option>En otro pais (especificar)</option>
-          <option>No había nacido</option>
-          <option>Ns/Nc</option>
-        </select>
-        <input id="dLugviviaTxt" placeholder="ESPECIFIQUE" style="display:none; margin-top:10px;" />
+      <div id="dViviaHace5Wrap">
+        <div class="field">
+          <div class="label">16. ¿Dónde vivía hace 5 años?</div>
+          <select id="dDondeViviaSel">
+            <option value="">Seleccione...</option>
+            <option>En esta localidad</option>
+            <option>En otra localidad de esta provincia</option>
+            <option>En otra provincia ( especificar)</option>
+            <option>En un país limítrofe (especificar)</option>
+            <option>En otro pais (especificar)</option>
+            <option>No había nacido</option>
+            <option>Ns/Nc</option>
+          </select>
+          <input id="dLugviviaTxt" placeholder="ESPECIFIQUE" style="display:none; margin-top:10px;" />
+        </div>
+
+        <div class="field">
+          <div class="label">16.1 Provincia</div>
+          <select id="dProvviviaSel">
+            <option value="">Seleccione...</option>
+            <option>Buenos Aires</option>
+            <option>CABA</option>
+            <option>Catamarca</option>
+            <option>Chaco</option>
+            <option>Chubut</option>
+            <option>Córdoba</option>
+            <option>Corrientes</option>
+            <option>Entre Ríos</option>
+            <option>Formosa</option>
+            <option>Jujuy</option>
+            <option>La Pampa</option>
+            <option>La Rioja</option>
+            <option>Mendoza</option>
+            <option>Misiones</option>
+            <option>Neuquén</option>
+            <option>Río Negro</option>
+            <option>Salta</option>
+            <option>San Juan</option>
+            <option>San Luis</option>
+            <option>Santa Cruz</option>
+            <option>Santa Fe</option>
+            <option>Santiago del Estero</option>
+            <option>Tierra del Fuego</option>
+            <option>Tucumán</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="label">16.2 País</div>
+          <select id="dPaisviviaSel">
+            <option value="">Seleccione...</option>
+            <option>Argentina</option><option>Bolivia</option><option>Brasil</option><option>Chile</option>
+            <option>Paraguay</option><option>Uruguay</option><option>Otro</option>
+          </select>
+          <input id="dPaisviviaOtro" placeholder="ESPECIFIQUE" style="display:none; margin-top:10px;" />
+        </div>
       </div>
 
-      <div class="field">
-        <div class="label">16.1 Provincia</div>
-        <select id="dProvviviaSel">
-          <option value="">Seleccione...</option>
-          <option>Buenos Aires</option>
-          <option>CABA</option>
-          <option>Catamarca</option>
-          <option>Chaco</option>
-          <option>Chubut</option>
-          <option>Córdoba</option>
-          <option>Corrientes</option>
-          <option>Entre Ríos</option>
-          <option>Formosa</option>
-          <option>Jujuy</option>
-          <option>La Pampa</option>
-          <option>La Rioja</option>
-          <option>Mendoza</option>
-          <option>Misiones</option>
-          <option>Neuquén</option>
-          <option>Río Negro</option>
-          <option>Salta</option>
-          <option>San Juan</option>
-          <option>San Luis</option>
-          <option>Santa Cruz</option>
-          <option>Santa Fe</option>
-          <option>Santiago del Estero</option>
-          <option>Tierra del Fuego</option>
-          <option>Tucumán</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <div class="label">16.2 País</div>
-        <select id="dPaisviviaSel">
-          <option value="">Seleccione...</option>
-          <option>Argentina</option><option>Bolivia</option><option>Brasil</option><option>Chile</option>
-          <option>Paraguay</option><option>Uruguay</option><option>Otro</option>
-        </select>
-        <input id="dPaisviviaOtro" placeholder="ESPECIFIQUE" style="display:none; margin-top:10px;" />
-      </div>
 
       <div class="row" style="justify-content:space-between; margin-top:10px;">
         <button class="btn btn-ghost" id="btnD5_Ant">Anterior</button>
@@ -4052,13 +4055,82 @@
     return String(Math.max(0, age));
   }
 
+
+
+
+
+
+  function habiaNacidoHace5Anios() {
+    const fechaNac = $("dFecNac").value;
+    if(!fechaNac) return true;
+
+    const [y, m, d] = fechaNac.split("-").map(Number);
+
+    const nacimiento = new Date(y, m - 1, d);
+
+    const hoy = new Date();
+    const fechaHace5Anios = new Date(
+      hoy.getFullYear() - 5,
+      hoy.getMonth(),
+      hoy.getDate()
+    );
+
+    return nacimiento <= fechaHace5Anios;
+  }
+
+
+  // function actualizarPregunta16() {
+  //   const mostrar = habiaNacidoHace5Anios();
+
+  //   $("dViviaHace5Wrap").style.display = mostrar ? "block" : "none";
+
+  //   // Si hace 5 años todavía no había nacido,
+  //   // limpiamos 16, 16.1 y 16.2.
+  //   if(!mostrar){
+  //     $("dDondeViviaSel").value = "";
+  //     $("dLugviviaTxt").value = "";
+  //     $("dLugviviaTxt").style.display = "none";
+
+  //     $("dPaisviviaOtro").value = "";
+  //     $("dViviaHace5Wrap").style.display = "block";
+
+
+  //     $("dProvviviaSel").value = "";
+  //     $("dPaisviviaSel").value = "";
+  //     $("dPaisviviaOtro").value = "";
+  //     $("dPaisviviaOtro").style.display = "none";
+  //   }
+  // }
+
+
+  function actualizarPregunta16() {
+    const mostrar = habiaNacidoHace5Anios();
+
+    $("dViviaHace5Wrap").style.display = mostrar ? "block" : "none";
+
+    // Si hace 5 años todavía no había nacido,
+    // limpiamos 16, 16.1 y 16.2.
+    if(!mostrar){
+      $("dDondeViviaSel").value = "";
+
+      $("dLugviviaTxt").value = "";
+      $("dLugviviaTxt").style.display = "none";
+
+      $("dProvviviaSel").value = "";
+
+      $("dPaisviviaSel").value = "";
+      $("dPaisviviaOtro").value = "";
+      $("dPaisviviaOtro").style.display = "none";
+    }
+  }
+
+
   $("dFecNac").addEventListener("change", () => {
     const edad = calcEdad($("dFecNac").value);
     $("dEdadShow").textContent = edad ? `${edad} años` : "—";
+
+    actualizarPregunta16();
   });
-
-
-
 
 
   $("btnBloqueD").addEventListener("click", async () => {
@@ -4324,12 +4396,41 @@
     if(!$("dPaisnacSel").value) return setError("d5Error","Responda 15.2.");
     if($("dPaisnacSel").value==="Otro" && !$("dPaisnacOtro").value.trim()) return setError("d5Error","Especifique país (15.2 Otro).");
 
-    if(!$("dDondeViviaSel").value) return setError("d5Error","Responda 16.");
-    if($("dLugviviaTxt").style.display!=="none" && !$("dLugviviaTxt").value.trim()) return setError("d5Error","Especifique lugar (16).");
+    // if(!$("dDondeViviaSel").value) return setError("d5Error","Responda 16.");
+    // if($("dLugviviaTxt").style.display!=="none" && !$("dLugviviaTxt").value.trim()) return setError("d5Error","Especifique lugar (16).");
 
-    if(!$("dProvviviaSel").value) return setError("d5Error","Responda 16.1.");
-    if(!$("dPaisviviaSel").value) return setError("d5Error","Responda 16.2.");
-    if($("dPaisviviaSel").value==="Otro" && !$("dPaisviviaOtro").value.trim()) return setError("d5Error","Especifique país (16.2 Otro).");
+    // if(!$("dProvviviaSel").value) return setError("d5Error","Responda 16.1.");
+    // if(!$("dPaisviviaSel").value) return setError("d5Error","Responda 16.2.");
+    // if($("dPaisviviaSel").value==="Otro" && !$("dPaisviviaOtro").value.trim()) return setError("d5Error","Especifique país (16.2 Otro).");
+
+
+    // 16, 16.1 y 16.2 sólo corresponden si la persona
+    // ya había nacido hace 5 años.
+    if(habiaNacidoHace5Anios()){
+
+      if(!$("dDondeViviaSel").value)
+        return setError("d5Error","Responda 16.");
+
+      if(
+        $("dLugviviaTxt").style.display !== "none" &&
+        !$("dLugviviaTxt").value.trim()
+      ){
+        return setError("d5Error","Especifique lugar (16).");
+      }
+
+      if(!$("dProvviviaSel").value)
+        return setError("d5Error","Responda 16.1.");
+
+      if(!$("dPaisviviaSel").value)
+        return setError("d5Error","Responda 16.2.");
+
+      if(
+        $("dPaisviviaSel").value === "Otro" &&
+        !$("dPaisviviaOtro").value.trim()
+      ){
+        return setError("d5Error","Especifique país (16.2 Otro).");
+      }
+    }
 
     showScreen("screenD_6");
   });
@@ -4444,6 +4545,11 @@
     $("dPaisviviaSel").value = "";
     $("dLugviviaTxt").value = "";
 
+
+    $("dPaisviviaOtro").value = "";
+    $("dViviaHace5Wrap").style.display = "block";
+
+
     resetSiNoBtn("btnD_perjub");
     $("dImpJub").value = "";
 
@@ -4554,9 +4660,24 @@
       lugnac: upperTxt($("dLugnacTxt").style.display === "none" ? "" : $("dLugnacTxt").value),
       provnac: upperTxt($("dProvnacSel").value || ""),
       paisnac: upperTxt(getOtroPayload("dPaisnacSel", "dPaisnacOtro")),
-      lugvivia: upperTxt($("dLugviviaTxt").style.display === "none" ? "" : $("dLugviviaTxt").value),
-      provvivia: upperTxt($("dProvviviaSel").value || ""),
-      paisvivia: upperTxt(getOtroPayload("dPaisviviaSel", "dPaisviviaOtro")),
+
+      // lugvivia: upperTxt($("dLugviviaTxt").style.display === "none" ? "" : $("dLugviviaTxt").value),
+      // provvivia: upperTxt($("dProvviviaSel").value || ""),
+      // paisvivia: upperTxt(getOtroPayload("dPaisviviaSel", "dPaisviviaOtro")),
+
+
+      lugvivia: habiaNacidoHace5Anios()
+        ? upperTxt($("dLugviviaTxt").style.display === "none" ? "" : $("dLugviviaTxt").value)
+        : "",
+
+      provvivia: habiaNacidoHace5Anios()
+        ? upperTxt($("dProvviviaSel").value || "")
+        : "",
+
+      paisvivia: habiaNacidoHace5Anios()
+        ? upperTxt(getOtroPayload("dPaisviviaSel", "dPaisviviaOtro"))
+        : "",
+
 
       perjub: upperTxt(($("btnD_perjub").textContent || "").trim()),
       impjub: String($("dImpJub").value.trim()),                
